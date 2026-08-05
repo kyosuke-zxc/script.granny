@@ -182,8 +182,9 @@ local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
 ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 12
 Instance.new("UICorner", ItemsSubBtn).CornerRadius = UDim.new(0, 5)
 
+-- КНОПКА ПОДМЕНЮ ТЕПЕРЬ НАЗЫВАЕТСЯ MOVEMENT
 local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
-EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "TELEPORT", Color3.fromRGB(200, 200, 200), 12
+EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
 local SearchBox = Instance.new("TextBox", MainFrame)
@@ -195,6 +196,18 @@ vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
+-- ПАНЕЛЬ С КНОПКАМИ ПОЛЕТА И НОКЛИПА
+local MoveControlsFrame = Instance.new("Frame", MainFrame)
+MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 40)
+
+local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
+FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
+Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
+
+local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
+NoclipBtn.Name, NoclipBtn.Size, NoclipBtn.Position, NoclipBtn.BackgroundColor3, NoclipBtn.Font, NoclipBtn.Text, NoclipBtn.TextColor3, NoclipBtn.TextSize = "NoclipBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0.52, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Noclip: OFF", Color3.fromRGB(255, 255, 255), 13
+Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
+
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
@@ -205,6 +218,8 @@ RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.T
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
 _G.cM, _G.cS, _G.SearchQuery = "Player", "Items", ""
+shared.CheatConfig.Fly = false
+shared.CheatConfig.Noclip = false
 
 SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
     _G.SearchQuery = SearchBox.Text
@@ -216,17 +231,53 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
     VisualsBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
     ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
-    EscBtn.MouseButton1Click:Connect(function() _G.cS = "TELEPORT" EscBtn.TextColor3, EscapesSubBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
+    EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
+
+-- ЦИКЛ С КЛИП ДВИЖКА
+game:GetService("RunService").Stepped:Connect(function()
+    if shared.CheatConfig.Noclip and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+end)
+
+-- ЦИКЛ ФЛАЙ СИСТЕМЫ
+local flySpeed = 50
+game:GetService("RunService").RenderStepped:Connect(function()
+    if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        local root = LocalPlayer.Character.HumanoidRootPart
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        hum.PlatformStand = true
+        local moveDir = hum.MoveDirection
+        local velocity = moveDir * flySpeed
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then velocity = velocity + Vector3.new(0, flySpeed, 0)
+        elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then velocity = velocity + Vector3.new(0, -flySpeed, 0) end
+        root.Velocity = velocity
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and not shared.CheatConfig.Fly then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").PlatformStand = false
+    end
+end)
+
+FlyBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Fly = not shared.CheatConfig.Fly
+    FlyBtn.BackgroundColor3 = shared.CheatConfig.Fly and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    FlyBtn.Text = shared.CheatConfig.Fly and "Fly: ON" or "Fly: OFF"
+end)
+
+NoclipBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Noclip = not shared.CheatConfig.Noclip
+    NoclipBtn.BackgroundColor3 = shared.CheatConfig.Noclip and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    NoclipBtn.Text = shared.CheatConfig.Noclip and "Noclip: ON" or "Noclip: OFF"
+end)
 
 local iK = {
     "key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", 
     "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", 
     "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", 
-    "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "wheel"
+    "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"
 }
-local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
-local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
 local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle"}
 -- part 4
 _G.updateMenuDisplay = function()
@@ -235,8 +286,9 @@ _G.updateMenuDisplay = function()
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+    
     if _G.cM == "Visuals" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Position, SF.Size = false, false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         local vG = Instance.new("TextButton", SF)
         vG.Size, vG.BackgroundColor3, vG.Font, vG.Text, vG.TextColor3, vG.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", Color3.fromRGB(255, 255, 255), 13
         Instance.new("UICorner", vG).CornerRadius = UDim.new(0, 5)
@@ -257,7 +309,7 @@ _G.updateMenuDisplay = function()
         te = 2 SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
     end
     if _G.cM == "Granny" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Position, SF.Size = false, false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1 local eB = Instance.new("TextButton", SF)
@@ -268,84 +320,69 @@ _G.updateMenuDisplay = function()
         end
 -- part 5
     elseif _G.cM == "Player" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = true, true, true, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
-        local currentQuery = string.lower(_G.SearchQuery)
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
-                local isInsideMonster = false
-                local checkParent = obj.Parent
-                while checkParent and checkParent ~= Workspace do
-                    local pName = string.lower(checkParent.Name)
-                    if (string.find(pName, "granny") or string.find(pName, "grandpa") or string.find(pName, "bot") or string.find(pName, "enemy")) and checkParent:FindFirstChildOfClass("Humanoid") then isInsideMonster = true break end
-                    checkParent = checkParent.Parent
-                end
-                local isAttackTrigger = string.find(string.lower(obj.Name), "attach") or string.find(string.lower(obj.Name), "kill")
-                
-                if not isInsideMonster and not isAttackTrigger then
-                    local targetObj = obj
-                    if not Players:GetPlayerFromCharacter(obj.Parent) then
-                        local current = obj
-                        while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") and not string.find(string.lower(current.Parent.Name), "item") and not string.find(string.lower(current.Parent.Name), "spawn") do current = current.Parent end
-                        targetObj = current
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible = true, true, true
+        
+        -- УДАЛИЛИ СПИСКИ ЗОН ПОБЕГА. Теперь во вкладке MOVEMENT отображаются строго кнопки управления полетом
+        if _G.cS == "Movement" then
+            MainFrame.SearchBox.Visible = false -- Скрываем строку поиска во вкладке перемещения
+            MainFrame.MoveControlsFrame.Visible = true
+            SF.Visible = false -- Полностью убираем зону скроллинга, так как объектов тут больше нет
+        else
+            MainFrame.SearchBox.Visible = true
+            MainFrame.MoveControlsFrame.Visible = false
+            SF.Visible = true
+            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
+            
+            local currentQuery = string.lower(_G.SearchQuery)
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
+                    local isInsideMonster = false
+                    local checkParent = obj.Parent
+                    while checkParent and checkParent ~= Workspace do
+                        local pName = string.lower(checkParent.Name)
+                        if (string.find(pName, "granny") or string.find(pName, "grandpa") or string.find(pName, "bot") or string.find(pName, "enemy")) and checkParent:FindFirstChildOfClass("Humanoid") then isInsideMonster = true break end
+                        checkParent = checkParent.Parent
                     end
+                    local isAttackTrigger = string.find(string.lower(obj.Name), "attach") or string.find(string.lower(obj.Name), "kill")
                     
-                    local customButtonName = targetObj.Name
-                    local nameLower = string.lower(customButtonName) local iV = false local isJunk = false
-                    for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
-                    
-                    -- ТОТАЛЬНЫЙ БЛОК ОТДЕЛЬНЫХ КОЛЁС
-                    if string.find(nameLower, "wheel") and not (string.find(nameLower, "car") or string.find(nameLower, "escape")) then isJunk = true end
-                    
-                    if not isJunk then
-                        if _G.cS == "Items" then
-                            -- ПРИНУДИТЕЛЬНЫЕ ИСКЛЮЧЕНИЯ ДЛЯ ПРЕДМЕТОВ (Батарейки и Свечи)
-                            local isBatteryOrSpark = string.find(nameLower, "battery") or string.find(nameLower, "spark")
+                    if not isInsideMonster and not isAttackTrigger then
+                        local targetObj = obj
+                        if not Players:GetPlayerFromCharacter(obj.Parent) then
+                            local current = obj
+                            while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") and not string.find(string.lower(current.Parent.Name), "item") and not string.find(string.lower(current.Parent.Name), "spawn") do current = current.Parent end
+                            targetObj = current
+                        end
+                        
+                        local customButtonName = targetObj.Name
+                        local nameLower = string.lower(customButtonName) local iV = false
+                        for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
+                        if string.find(nameLower, "wheel") and not (string.find(nameLower, "car") or string.find(nameLower, "escape")) then isJunk = true end
+                        
+                        if not isJunk then
+                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark")
                             local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
                             
-                            -- Если это батарейка, она ЖЕЛЕЗНО идёт в предметы, игнорируя слово "door"
-                            if isBatteryOrSpark then
-                                iV = true
+                            if isItemException then iV = true
                             elseif not isEscapeObject then 
                                 local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                if hasItemTrigger then
-                                    iV = true
-                                else
-                                    for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end 
-                                end
-                            end
-                        elseif _G.cS == "TELEPORT" then
-                            local isEscapeMatch = false
-                            for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
-                            if isEscapeMatch then 
-                                if string.find(nameLower, "door") or string.find(nameLower, "gate") then for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end else iV = true end 
+                                if hasItemTrigger then iV = true
+                                else for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
                             end
                         end
                         if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
-                    end
-                    
-                    if iV then
-                        if string.find(nameLower, "car") or string.find(nameLower, "truck") or string.find(nameLower, "vehicle") then customButtonName = "Car Escape"
-                        elseif string.find(nameLower, "boat") then customButtonName = "Boat Escape"
-                        elseif string.find(nameLower, "helicopter") then customButtonName = "Helicopter Escape" end
-                    end
-                    
-                    if iV and not ad[customButtonName] and not Players:GetPlayerFromCharacter(targetObj) then
-                        ad[customButtonName] = true te = te + 1
-                        local eB = Instance.new("TextButton", SF)
-                        eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
-                        Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                        eB.MouseButton1Click:Connect(function() pcall(function()
-                            if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
-                                if tC then 
-                                    if _G.cS == "TELEPORT" and currentQuery == "" then 
-                                        LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) 
-                                    else 
-                                        LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) 
-                                    end 
+                        
+                        if iV and not ad[customButtonName] and not Players:GetPlayerFromCharacter(targetObj) then
+                            ad[customButtonName] = true te = te + 1
+                            local eB = Instance.new("TextButton", SF)
+                            eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
+                            Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
+                            eB.MouseButton1Click:Connect(function() pcall(function()
+                                if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                    local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
+                                    if tC then LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) end
                                 end
-                            end
-                        end) end)
+                            end) end)
+                        end
                     end
                 end
             end
