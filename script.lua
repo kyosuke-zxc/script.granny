@@ -3,20 +3,24 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false }
 
+-- ОБХОД ДЛЯ 3RD PERSON: Перехватываем каждый кадр рендера и сбрасываем LockFirstPerson игры
+RunService.RenderStepped:Connect(function()
+    if shared.CheatConfig.ThirdPerson then
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        LocalPlayer.CameraMaxZoomDistance = 150
+        if LocalPlayer.CameraMinZoomDistance < 5 then LocalPlayer.CameraMinZoomDistance = 5 end
+    end
+end)
+
 local function toggleThirdPerson(enable)
     pcall(function()
-        local cam = Workspace.CurrentCamera
-        if enable then
-            LocalPlayer.CameraMaxZoomDistance = 150
-            LocalPlayer.CameraMinZoomDistance = 5
-            LocalPlayer.CameraMode = Enum.CameraMode.Classic
-            if cam then cam.FieldOfView = 90 end
-        else
+        if not enable then
             LocalPlayer.CameraMaxZoomDistance = 12
             LocalPlayer.CameraMinZoomDistance = 0.5
             LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
@@ -24,6 +28,7 @@ local function toggleThirdPerson(enable)
     end)
 end
 
+-- ТВОЙ РОДНОЙ РАБОЧИЙ ПОИСК ИГРОКА ДЛЯ ТЕЛЕПОРТА
 local function getRandomAlly()
     local allies = {}
     for _, p in pairs(Players:GetPlayers()) do
@@ -69,19 +74,19 @@ local function applyPlayersESP(targetFrame, customName)
     end
 end
 
+-- ТОТАЛЬНЫЙ ESP С КАНАЛА: Ищет абсолютно всех ботов и игроков
 task.spawn(function()
     while task.wait(1.5) do
         if shared.CheatConfig.PlayersESP then
             pcall(function()
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character then applyPlayersESP(p.Character, p.DisplayName or p.Name) end
-                end
                 for _, obj in pairs(Workspace:GetDescendants()) do
-                    if obj:IsA("Model") and obj.Parent ~= Players and obj.Parent ~= LocalPlayer.Character then
-                        local oLower = string.lower(obj.Name)
-                        local hum = obj:FindFirstChildOfClass("Humanoid")
-                        local isBot = string.find(oLower, "granny") or string.find(oLower, "grandpa") or string.find(oLower, "bot") or string.find(oLower, "npc") or (hum and (string.lower(hum.DisplayName) == "enemy" or string.find(string.lower(hum.DisplayName), "granny")))
-                        if isBot then applyPlayersESP(obj, "Bot / Enemy") end
+                    if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+                        if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+                            local nameToDisplay = obj.Name
+                            local player = Players:GetPlayerFromCharacter(obj)
+                            if player then nameToDisplay = player.DisplayName or player.Name end
+                            applyPlayersESP(obj, nameToDisplay)
+                        end
                     end
                 end
             end)
@@ -89,8 +94,9 @@ task.spawn(function()
     end
 end)
 
+-- ТВОЙ РОДНОЙ РАБОЧИЙ АНТИКИЛЛ ЦИКЛ
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.01) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             pcall(function()
                 local myRoot = LocalPlayer.Character.HumanoidRootPart
@@ -179,6 +185,7 @@ _G.cM, _G.cS = "Player", "Items"
 local iK = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon"}
 local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
 local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
+-- ОЧИСТКА СПИСКА ПРЕДМЕТОВ: Избавились от car1, car2 и лишнего спама деталей машин
 local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture"}
 -- part 3
 local function updateMenuDisplay()
