@@ -298,14 +298,20 @@ _G.updateMenuDisplay = function()
                     
                     if not isJunk then
                         if _G.cS == "Items" then
-                            -- УМНЫЙ ТОТАЛЬНЫЙ СКАН ПРЕДМЕТОВ: Ищем триггеры подбора ИЛИ совпадения по словарю
-                            local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                            local isEscapePart = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
+                            -- ПРИНУДИТЕЛЬНЫЕ ИСКЛЮЧЕНИЯ ДЛЯ ПРЕДМЕТОВ (Батарейки и Свечи)
+                            local isBatteryOrSpark = string.find(nameLower, "battery") or string.find(nameLower, "spark")
+                            local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
                             
-                            if hasItemTrigger and not isEscapePart then 
+                            -- Если это батарейка, она ЖЕЛЕЗНО идёт в предметы, игнорируя слово "door"
+                            if isBatteryOrSpark then
                                 iV = true
-                            else 
-                                for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end 
+                            elseif not isEscapeObject then 
+                                local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                if hasItemTrigger then
+                                    iV = true
+                                else
+                                    for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end 
+                                end
                             end
                         elseif _G.cS == "TELEPORT" then
                             local isEscapeMatch = false
@@ -328,8 +334,6 @@ _G.updateMenuDisplay = function()
                         local eB = Instance.new("TextButton", SF)
                         eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                         Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                        
-                        -- СТАБИЛЬНЫЙ, НАДЁЖНЫЙ ТЕЛЕПОРТ ПЕРСОНАЖА (КАК ТЫ И ХОТЕЛ)
                         eB.MouseButton1Click:Connect(function() pcall(function()
                             if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                                 local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
@@ -337,7 +341,6 @@ _G.updateMenuDisplay = function()
                                     if _G.cS == "TELEPORT" and currentQuery == "" then 
                                         LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) 
                                     else 
-                                        -- Безопасный ТП чуть выше предмета, чтобы ты 100% его поднял
                                         LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) 
                                     end 
                                 end
