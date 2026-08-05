@@ -73,7 +73,18 @@ local function applyPlayersESP(targetFrame, customName)
     end
 end
 
--- СКАНИРОВАНИЕ КАРТЫ (ФИКС ИМЕНИ ДЛЯ БОТОВ)
+-- ФИКС ESP ДЛЯ НОВЫХ ИСПАВНИВШИХСЯ ИГРОКОВ ЧЕРЕЗ ИВЕНТЫ ДВИЖКА
+local function watchPlayer(p)
+    p.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        if shared.CheatConfig.PlayersESP then
+            applyPlayersESP(char, p.DisplayName or p.Name)
+        end
+    end)
+end
+for _, p in pairs(Players:GetPlayers()) do watchPlayer(p) end
+Players.PlayerAdded:Connect(watchPlayer)
+
 task.spawn(function()
     while task.wait(1.5) do
         if shared.CheatConfig.PlayersESP then
@@ -82,12 +93,7 @@ task.spawn(function()
                     if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                         if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
                             local player = Players:GetPlayerFromCharacter(obj)
-                            local nameToDisplay = ""
-                            if player then
-                                nameToDisplay = player.DisplayName or player.Name
-                            else
-                                nameToDisplay = "Bot"
-                            end
+                            local nameToDisplay = player and (player.DisplayName or player.Name) or "Bot"
                             applyPlayersESP(obj, nameToDisplay)
                         end
                     end
@@ -98,14 +104,17 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.01) do
+    while task.wait(0.15) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             pcall(function()
                 local myRoot = LocalPlayer.Character.HumanoidRootPart
                 local needToTeleport = false
-                for _, obj in pairs(Workspace:GetDescendants()) do
+                for _, obj in pairs(Workspace:GetChildren()) do
                     if obj:IsA("BasePart") and (string.find(string.lower(obj.Name), "trap") or string.find(string.lower(obj.Name), "beartrap")) then
                         if (myRoot.Position - obj.Position).Magnitude < 7 then needToTeleport = true break end
+                    elseif obj:IsA("Model") and (string.find(string.lower(obj.Name), "trap") or string.find(string.lower(obj.Name), "beartrap")) then
+                        local p = obj:FindFirstChildWhichIsA("BasePart", true)
+                        if p and (myRoot.Position - p.Position).Magnitude < 7 then needToTeleport = true break end
                     end
                 end
                 if not needToTeleport then
@@ -118,7 +127,7 @@ task.spawn(function()
                         end
                     end
                     if not dangerTarget then
-                        for _, o in pairs(Workspace:GetDescendants()) do
+                        for _, o in pairs(Workspace:GetChildren()) do
                             if o:IsA("Model") and o:FindFirstChild("HumanoidRootPart") and (string.find(string.lower(o.Name), "granny") or string.find(string.lower(o.Name), "grandpa") or string.find(string.lower(o.Name), "bot")) then
                                 dangerTarget = o.HumanoidRootPart break
                             end
@@ -128,14 +137,13 @@ task.spawn(function()
                 end
                 if needToTeleport then
                     local targetAlly = getRandomAlly()
-                    if targetAlly then 
-                        myRoot.CFrame = targetAlly.CFrame + Vector3.new(0, 3, 0) 
+                    if targetAlly then myRoot.CFrame = targetAlly.CFrame + Vector3.new(0, 3, 0) 
                     else 
                         local spawnLoc = Workspace:FindFirstChildWhichIsA("SpawnLocation", true)
                         if spawnLoc then myRoot.CFrame = spawnLoc.CFrame + Vector3.new(0, 3, 0)
                         else myRoot.CFrame = myRoot.CFrame * CFrame.new(math.random(1) == 1 and 60 or -60, 0, math.random(1) == 1 and 60 or -60) end
                     end
-                    task.wait(0.6)
+                    task.wait(0.4)
                 end
             end)
         end
@@ -178,12 +186,10 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "TELEPORT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
--- ЧИСТЫЙ СЕРЧБОКС БЕЗ СЛОВ "e.g. pliers"
 local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.25, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- КНОПКА ЗАКРЕПЛЕНА В ОСНОВНОМ ОКНЕ (Не двигается при скроллинге!)
 local vAK = Instance.new("TextButton", MainFrame)
 vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.34, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
@@ -210,18 +216,18 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
     VisualsBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
     ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
-    EscBtn.MouseButton1Click:Connect(function() _G.cS = "TELEPORT" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
+    EscBtn.MouseButton1Click:Connect(function() _G.cS = "TELEPORT" EscBtn.TextColor3, EscapesSubBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
 
 local iK = {
     "key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", 
     "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", 
     "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", 
-    "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"
+    "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "wheel"
 }
 local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
 local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
-local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture"}
+local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle"}
 -- part 4
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
@@ -233,7 +239,7 @@ _G.updateMenuDisplay = function()
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         local function makeVisBtn(txt, state, cb)
             local v = Instance.new("TextButton", SF)
-            v.Size, v.BackgroundColor3, v.Text, v.TextColor3, v.Font, v.TextSize = UDim2.new(1, 0, 0, 35), state and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), txt, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+            v.Size, v.BackgroundColor3, v.Text, v.TextColor3, v.Font, v.TextSize = UDim2.new(1, 0, 0, 35), state and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), t, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
             Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5)
             v.MouseButton1Click:Connect(cb) return v
         end
@@ -252,48 +258,69 @@ _G.updateMenuDisplay = function()
             end
         end
     elseif _G.cM == "Player" then
-        -- СДВИГ СКРОЛЛ-СПИСКА: Начинается ниже закрепленных кнопок
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = true, true, true, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
         local currentQuery = string.lower(_G.SearchQuery)
         for _, obj in pairs(Workspace:GetDescendants()) do
             if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
-                
-                -- РЕКУРСИВНЫЙ ПОИСК РОДИТЕЛЯ: Поднимается до главной модели машины, стирая 100 дубликатов кнопок
-                local targetObj = obj
-                if not Players:GetPlayerFromCharacter(obj.Parent) then
-                    local current = obj
-                    while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") do current = current.Parent end
-                    targetObj = current
+                local isInsideMonster = false
+                local checkParent = obj.Parent
+                while checkParent and checkParent ~= Workspace do
+                    local pName = string.lower(checkParent.Name)
+                    if (string.find(pName, "granny") or string.find(pName, "grandpa") or string.find(pName, "bot") or string.find(pName, "enemy")) and checkParent:FindFirstChildOfClass("Humanoid") then isInsideMonster = true break end
+                    checkParent = checkParent.Parent
                 end
+                local isAttackTrigger = string.find(string.lower(obj.Name), "attach") or string.find(string.lower(obj.Name), "kill")
                 
-                local nameLower = string.lower(targetObj.Name) local iV = false local isJunk = false
-                for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
-                if not isJunk then
-                    if _G.cS == "Items" then
-                        local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
-                        if not isEscapeObject then for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
-                    elseif _G.cS == "TELEPORT" then
-                        local isItemObject = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse") or string.find(nameLower, "pliers") or string.find(nameLower, "shotgun")
-                        if not isItemObject then
-                            local isEscapeMatch = false
-                            for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
-                            if isEscapeMatch then if string.find(nameLower, "door") or string.find(nameLower, "gate") then for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end else iV = true end end
-                            if string.find(nameLower, "wheel") or string.find(nameLower, "carengine") then iV = true end
-                        end
+                if not isInsideMonster and not isAttackTrigger then
+                    local targetObj = obj
+                    if not Players:GetPlayerFromCharacter(obj.Parent) then
+                        local current = obj
+                        while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") and not string.find(string.lower(current.Parent.Name), "item") and not string.find(string.lower(current.Parent.Name), "spawn") do current = current.Parent end
+                        targetObj = current
                     end
-                    if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
-                end
-                if iV and not ad[targetObj.Name] and not Players:GetPlayerFromCharacter(targetObj) then
-                    ad[targetObj.Name] = true te = te + 1
-                    local eB = Instance.new("TextButton", SF)
-                    eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. targetObj.Name, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
-                    Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                    eB.MouseButton1Click:Connect(function() pcall(function()
-                        if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                            local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
-                            if tC then if _G.cS == "TELEPORT" and currentQuery == "" then LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) else LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) end end
+                    
+                    local customButtonName = targetObj.Name
+                    local nameLower = string.lower(customButtonName) local iV = false local isJunk = false
+                    for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
+                    if not isJunk then
+                        if _G.cS == "Items" then
+                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark") or string.find(nameLower, "wheel")
+                            local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
+                            
+                            if isItemException then iV = true
+                            elseif not isEscapeObject then for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
+                        elseif _G.cS == "TELEPORT" then
+                            local isItemObject = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse") or string.find(nameLower, "pliers") or string.find(nameLower, "shotgun") or string.find(nameLower, "plank") or string.find(nameLower, "wheel")
+                            if not isItemObject then
+                                local isEscapeMatch = false
+                                for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
+                                if isEscapeMatch then 
+                                    if string.find(nameLower, "door") or string.find(nameLower, "gate") then for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end else iV = true end 
+                                end
+                                if string.find(nameLower, "carengine") then iV = true end
+                            end
                         end
-                    end) end)
+                        if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
+                    end
+                    
+                    if iV then
+                        if string.find(nameLower, "car") or string.find(nameLower, "truck") or string.find(nameLower, "vehicle") then customButtonName = "Car Escape"
+                        elseif string.find(nameLower, "boat") then customButtonName = "Boat Escape"
+                        elseif string.find(nameLower, "helicopter") then customButtonName = "Helicopter Escape" end
+                    end
+                    
+                    if iV and not ad[customButtonName] and not Players:GetPlayerFromCharacter(targetObj) then
+                        ad[customButtonName] = true te = te + 1
+                        local eB = Instance.new("TextButton", SF)
+                        eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
+                        Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
+                        eB.MouseButton1Click:Connect(function() pcall(function()
+                            if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
+                                if tC then if _G.cS == "TELEPORT" and currentQuery == "" then LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) else LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) end end
+                            end
+                        end) end)
+                    end
                 end
             end
         end
