@@ -235,18 +235,32 @@ _G.updateMenuDisplay = function()
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+    
     if _G.cM == "Visuals" then
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
-        local function makeVisBtn(txt, state, cb)
-            local v = Instance.new("TextButton", SF)
-            v.Size, v.BackgroundColor3, v.Text, v.TextColor3, v.Font, v.TextSize = UDim2.new(1, 0, 0, 35), state and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), t, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
-            Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5)
-            v.MouseButton1Click:Connect(cb) return v
-        end
-        local vG; vG = makeVisBtn(shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP vG.BackgroundColor3, vG.Text = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
-        local v3; v3 = makeVisBtn(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) v3.BackgroundColor3, v3.Text=shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
-        SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
+        
+        local vG = Instance.new("TextButton", SF)
+        vG.Size, vG.BackgroundColor3, vG.Font, vG.Text, vG.TextColor3, vG.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", Color3.fromRGB(255, 255, 255), 13
+        Instance.new("UICorner", vG).CornerRadius = UDim.new(0, 5)
+        vG.MouseButton1Click:Connect(function()
+            shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP
+            vG.BackgroundColor3 = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
+            vG.Text = shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF"
+        end)
+        
+        local v3 = Instance.new("TextButton", SF)
+        v3.Size, v3.BackgroundColor3, v3.Font, v3.Text, v3.TextColor3, v3.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", Color3.fromRGB(255, 255, 255), 13
+        Instance.new("UICorner", v3).CornerRadius = UDim.new(0, 5)
+        v3.MouseButton1Click:Connect(function()
+            shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson
+            toggleThirdPerson(shared.CheatConfig.ThirdPerson)
+            v3.BackgroundColor3 = shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
+            v3.Text = shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF"
+        end)
+        
+        te = 2 SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
     end
+    
     if _G.cM == "Granny" then
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
@@ -257,6 +271,7 @@ _G.updateMenuDisplay = function()
                 eB.MouseButton1Click:Connect(function() pcall(function() if p.Character and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end end) end)
             end
         end
+-- part 5
     elseif _G.cM == "Player" then
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = true, true, true, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
         local currentQuery = string.lower(_G.SearchQuery)
