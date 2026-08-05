@@ -175,9 +175,8 @@ local function updateMenuDisplay()
         
         local vG; vG = makeVisBtn(_G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF", _G.PlayersESP_Enabled, function() _G.PlayersESP_Enabled = not _G.PlayersESP_Enabled vG.BackgroundColor3, vG.Text = _G.PlayersESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
         local v3; v3 = makeVisBtn(_G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF", _G.ThirdPerson_Enabled, function() _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled toggleThirdPerson(_G.ThirdPerson_Enabled) v3.BackgroundColor3, v3.Text = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
-        local vUL; vUL = makeVisBtn(_G.MouseUnlock_Enabled and "Unlock Mouse: ON" or "Unlock Mouse: OFF", _G.MouseUnlock_Enabled, function() _G.MouseUnlock_Enabled = not _G.MouseUnlock_Enabled vUL.BackgroundColor3, vUL.Text = _G.MouseUnlock_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.MouseUnlock_Enabled and "Unlock Mouse: ON" or "Unlock Mouse: OFF" end)
         
-        SF.CanvasSize = UDim2.new(0, 0, 0, 130)
+        SF.CanvasSize = UDim2.new(0, 0, 0, 90)
         return
     end
     
@@ -256,7 +255,7 @@ local function updateMenuDisplay()
             end
         end
     end
-    SF.CanvasSize = UDim2.new(0, 0, 0, te * 38)
+    SF.CanvasSize = UDim2.new(0, 0, 0, te * 130)
 end
 
 PlayerTabBtn.MouseButton1Click:Connect(function() _G.cM = "Player" updateMenuDisplay() end)
