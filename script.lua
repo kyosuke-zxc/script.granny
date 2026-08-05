@@ -293,25 +293,20 @@ _G.updateMenuDisplay = function()
                     local nameLower = string.lower(customButtonName) local iV = false local isJunk = false
                     for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
                     
-                    -- ТОТАЛЬНЫЙ БЛЕКЛИСТ НА ЛЮБОЕ УПОМИНАНИЕ КОЛЁС
-                    if string.find(nameLower, "wheel") then isJunk = true end
+                    if string.find(nameLower, "wheel") and not (string.find(nameLower, "car") or string.find(nameLower, "escape")) then isJunk = true end
                     
                     if not isJunk then
                         if _G.cS == "Items" then
-                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark")
-                            local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
+                            local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                            local isEscapePart = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
                             
-                            if isItemException then iV = true
-                            elseif not isEscapeObject then for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
+                            if hasItemTrigger and not isEscapePart then iV = true
+                            else for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
                         elseif _G.cS == "TELEPORT" then
-                            local isItemObject = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse") or string.find(nameLower, "pliers") or string.find(nameLower, "shotgun") or string.find(nameLower, "plank")
-                            if not isItemObject then
-                                local isEscapeMatch = false
-                                for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
-                                if isEscapeMatch then 
-                                    if string.find(nameLower, "door") or string.find(nameLower, "gate") then for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end else iV = true end 
-                                end
-                                if string.find(nameLower, "carengine") then iV = true end
+                            local isEscapeMatch = false
+                            for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
+                            if isEscapeMatch then 
+                                if string.find(nameLower, "door") or string.find(nameLower, "gate") then for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end else iV = true end 
                             end
                         end
                         if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
@@ -328,10 +323,40 @@ _G.updateMenuDisplay = function()
                         local eB = Instance.new("TextButton", SF)
                         eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                         Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
+                        
+                        -- ЛОГИКА ЭКСПЕРИМЕНТАЛЬНОГО АВТОПОДБОРА / ТЕЛЕПОРТА
                         eB.MouseButton1Click:Connect(function() pcall(function()
                             if targetObj and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
-                                if tC then if _G.cS == "TELEPORT" and currentQuery == "" then LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) else LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) end end
+                                local myRoot = LocalPlayer.Character.HumanoidRootPart
+                                
+                                if _G.cS == "TELEPORT" then
+                                    -- Для побегов оставляем классический ТП (машину в карман не положить)
+                                    local tC = targetObj:IsA("Model") and (targetObj.PrimaryPart and targetObj.PrimaryPart.CFrame or targetObj:FindFirstChildWhichIsA("BasePart", true).CFrame) or targetObj.CFrame
+                                    if tC then myRoot.CFrame = tC * CFrame.new(0, 0, 5) end
+                                else
+                                    -- Для предметов активируем функцию ЭКСТРЕННОГО ДИСТАНЦИОННОГО ПОДБОРА
+                                    local mainPart = targetObj:IsA("Model") and targetObj:FindFirstChildWhichIsA("BasePart", true) or targetObj
+                                    if mainPart and mainPart:IsA("BasePart") then
+                                        local oldCFrame = mainPart.CFrame
+                                        
+                                        -- На микросекунду притягиваем предмет к руке персонажа
+                                        mainPart.CFrame = myRoot.CFrame + Vector3.new(0, 0, -2)
+                                        task.wait(0.02)
+                                        
+                                        -- Прожимаем все возможные триггеры подбора Roblox
+                                        local cd = targetObj:FindFirstChildWhichIsA("ClickDetector", true) or mainPart:FindFirstChildWhichIsA("ClickDetector")
+                                        if cd then fireclickdetector(cd) end
+                                        
+                                        local pp = targetFrame:FindFirstChildWhichIsA("ProximityPrompt", true) or targetObj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                        if pp then fireproximityprompt(pp) end
+                                        
+                                        -- Возвращаем предмет обратно, если игра его не забрала в инвентарь
+                                        task.wait(0.02)
+                                        if mainPart and mainPart.Parent then
+                                            mainPart.CFrame = oldCFrame
+                                        end
+                                    end
+                                end
                             end
                         end) end)
                     end
