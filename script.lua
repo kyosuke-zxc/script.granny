@@ -1,13 +1,6 @@
 -- PART 1
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
--- Авто-ожидание спавна персонажа
-while not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") do
-    task.wait(0.5)
-end
-task.wait(0.5)
-
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 
@@ -95,7 +88,7 @@ task.spawn(function()
             pcall(function()
                 local myRoot = LocalPlayer.Character.HumanoidRootPart
                 
-                -- 1. ПРОВЕРКА НА КАПКАНЫ (Bear Traps) - ТЕЛЕПОРТ НА 10 СТУДИЙ ВПЕРЕД
+                -- ПРОВЕРКА НА КАПКАНЫ (Bear Traps) - ТЕЛЕПОРТ НА 10 СТУДИЙ ВПЕРЕД
                 for _, obj in pairs(workspace:GetDescendants()) do
                     if obj:IsA("BasePart") or obj:IsA("Model") then
                         local oName = string.lower(obj.Name)
@@ -112,7 +105,7 @@ task.spawn(function()
                     end
                 end
 
-                -- 2. ПРОВЕРКА НА БАБКУ
+                -- ПРОВЕРКА НА БАБКУ
                 local dangerTarget = nil
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -132,7 +125,6 @@ task.spawn(function()
                 if dangerTarget then
                     local dist = (myRoot.Position - dangerTarget.Position).Magnitude
                     if dist < 8 then
-                        -- СБОР ВСЕХ ЖИВЫХ СОЮЗНИКОВ ДЛЯ СЛУЧАЙНОГО ПОБЕГА
                         local allies = {}
                         for _, p in pairs(Players:GetPlayers()) do
                             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -143,8 +135,6 @@ task.spawn(function()
                                 end
                             end
                         end
-                        
-                        -- Телепортируем к СЛУЧАЙНОМУ другу из таблицы, а если сервак пустой — на 25 студий вверх
                         if #allies > 0 then
                             local randomAlly = allies[math.random(1, #allies)]
                             myRoot.CFrame = randomAlly.CFrame + Vector3.new(0, 2, 0)
