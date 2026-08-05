@@ -9,25 +9,7 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false }
 
--- ОБРАБОТЧИКИ КЛИКОВ ПО КНОПКАМ (Перенесены сюда для баланса веса кода)
-local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
-    PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
-    GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
-    VisualsBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
-    
-    ItemsBtn.MouseButton1Click:Connect(function() 
-        _G.cS = "Items" 
-        ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) 
-        _G.updateMenuDisplay() 
-    end)
-    
-    EscBtn.MouseButton1Click:Connect(function() 
-        _G.cS = "TELEPORT" 
-        EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) 
-        _G.updateMenuDisplay() 
-    end)
-end
-
+-- ЖЕСТКИЙ ЦИКЛ ДЛЯ 3RD PERSON (Ломает внутренние скрипты блокировки игры)
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
@@ -91,6 +73,7 @@ local function applyPlayersESP(targetFrame, customName)
     end
 end
 
+-- СКАНИРОВАНИЕ КАРТЫ (ФИКС ИМЕНИ ДЛЯ БОТОВ)
 task.spawn(function()
     while task.wait(1.5) do
         if shared.CheatConfig.PlayersESP then
@@ -98,9 +81,13 @@ task.spawn(function()
                 for _, obj in pairs(Workspace:GetDescendants()) do
                     if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                         if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
-                            local nameToDisplay = obj.Name
                             local player = Players:GetPlayerFromCharacter(obj)
-                            if player then nameToDisplay = player.DisplayName or player.Name end
+                            local nameToDisplay = ""
+                            if player then
+                                nameToDisplay = player.DisplayName or player.Name
+                            else
+                                nameToDisplay = "Bot"
+                            end
                             applyPlayersESP(obj, nameToDisplay)
                         end
                     end
@@ -160,14 +147,14 @@ ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
--- part 3a
+-- part 3
 local UserInputService = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = input.Position startPos = MainFrame.Position input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end
 end)
 MainFrame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
-UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+local UIS = UserInputService UIS.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
 local function createTab(name, text, posX)
     local btn = Instance.new("TextButton", MainFrame)
@@ -191,9 +178,16 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "TELEPORT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
+-- ЧИСТЫЙ СЕРЧБОКС БЕЗ СЛОВ "e.g. pliers"
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.25, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here (e.g. pliers)...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.25, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
+
+-- КНОПКА ЗАКРЕПЛЕНА В ОСНОВНОМ ОКНЕ (Не двигается при скроллинге!)
+local vAK = Instance.new("TextButton", MainFrame)
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.34, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
+vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
@@ -211,6 +205,14 @@ SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
     if _G.updateMenuDisplay then _G.updateMenuDisplay() end
 end)
 
+local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
+    PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
+    GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
+    VisualsBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
+    ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
+    EscBtn.MouseButton1Click:Connect(function() _G.cS = "TELEPORT" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
+end
+
 local iK = {
     "key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", 
     "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", 
@@ -220,7 +222,7 @@ local iK = {
 local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
 local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
 local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture"}
--- part 3b
+-- part 4
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
     local ad, te = {}, 0
@@ -228,7 +230,7 @@ _G.updateMenuDisplay = function()
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     if _G.cM == "Visuals" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, SF.Position, SF.Size = false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         local function makeVisBtn(txt, state, cb)
             local v = Instance.new("TextButton", SF)
             v.Size, v.BackgroundColor3, v.Text, v.TextColor3, v.Font, v.TextSize = UDim2.new(1, 0, 0, 35), state and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), txt, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
@@ -236,11 +238,11 @@ _G.updateMenuDisplay = function()
             v.MouseButton1Click:Connect(cb) return v
         end
         local vG; vG = makeVisBtn(shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP vG.BackgroundColor3, vG.Text = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
-        local v3; v3 = makeVisBtn(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) v3.BackgroundColor3, v3.Text = shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
+        local v3; v3 = makeVisBtn(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) v3.BackgroundColor3, v3.Text=shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
         SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
     end
     if _G.cM == "Granny" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, SF.Position, SF.Size = false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1 local eB = Instance.new("TextButton", SF)
@@ -250,16 +252,20 @@ _G.updateMenuDisplay = function()
             end
         end
     elseif _G.cM == "Player" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, SF.Position, SF.Size = true, true, UDim2.new(0.05, 0, 0.33, 0), UDim2.new(0.9, 0, 0, 165)
-        te = te + 1 local vAK = Instance.new("TextButton", SF)
-        vAK.Size, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
-        Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
-        vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
+        -- СДВИГ СКРОЛЛ-СПИСКА: Начинается ниже закрепленных кнопок
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = true, true, true, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
         local currentQuery = string.lower(_G.SearchQuery)
         for _, obj in pairs(Workspace:GetDescendants()) do
             if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
+                
+                -- РЕКУРСИВНЫЙ ПОИСК РОДИТЕЛЯ: Поднимается до главной модели машины, стирая 100 дубликатов кнопок
                 local targetObj = obj
-                if obj:IsA("BasePart") and obj.Parent:IsA("Model") and not Players:GetPlayerFromCharacter(obj.Parent) then targetObj = obj.Parent end
+                if not Players:GetPlayerFromCharacter(obj.Parent) then
+                    local current = obj
+                    while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") do current = current.Parent end
+                    targetObj = current
+                end
+                
                 local nameLower = string.lower(targetObj.Name) local iV = false local isJunk = false
                 for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
                 if not isJunk then
