@@ -3,138 +3,108 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then
     CoreGui["GrannyPremiumClean"]:Destroy()
 end
 
--- Глобальные переключатели
+-- Переключатели режимов
 _G.PlayersESP_Enabled = false
 _G.ThirdPerson_Enabled = false
-_G.AntiKillTrap_Enabled = false -- Одна общая переменная на оба режима!
+_G.AntiKillTrap_Enabled = false
+_G.MouseUnlock_Enabled = false -- Переключатель для Shift Lock Unclocker
 
--- Оптимальный контроллер 3rd Person камеры
+-- Контроллер мыши (Shift Lock Unclocker)
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.1) do
         pcall(function()
-            if _G.ThirdPerson_Enabled then
-                LocalPlayer.CameraMaxZoomDistance = 35
-                LocalPlayer.CameraMinZoomDistance = 5
-                if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then LocalPlayer.CameraMode = Enum.CameraMode.Classic end
-            else
-                LocalPlayer.CameraMaxZoomDistance = 12
-                LocalPlayer.CameraMinZoomDistance = 0.5
-                LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+            if _G.MouseUnlock_Enabled then
+                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                LocalPlayer.DevEnableMouseLock = false
             end
         end)
     end
 end)
 
--- Конструктор ЕСП (Строго красный для всех)
-local function applyPlayersESP(targetFrame, customName)
-    if not targetFrame or not targetFrame.Parent then return end
-    local espName = "UniversalRedESP"
-    
-    if not _G.PlayersESP_Enabled then
-        if targetFrame:FindFirstChild(espName) then targetFrame[espName]:Destroy() end
-        if targetFrame:FindFirstChild(espName.."Text") then targetFrame[espName.."Text"]:Destroy() end
-        return
-    end
-    
-    if not targetFrame:FindFirstChild(espName) then
-        local hl = Instance.new("Highlight", targetFrame)
-        hl.Name, hl.FillColor, hl.FillTransparency, hl.OutlineColor = espName, Color3.fromRGB(255, 0, 0), 0.5, Color3.fromRGB(255, 255, 255)
-    end
-    
-    if not targetFrame:FindFirstChild(espName.."Text") then
-        local bgui = Instance.new("BillboardGui", targetFrame)
-        bgui.Name, bgui.Size, bgui.AlwaysOnTop, bgui.StudsOffset = espName.."Text", UDim2.new(0, 150, 0, 40), true, Vector3.new(0, 3, 0)
-        local label = Instance.new("TextLabel", bgui)
-        label.Size, label.BackgroundTransparency, label.Text, label.TextColor3, label.TextSize, label.Font = UDim2.new(1, 0, 1, 0), 1, customName or targetFrame.Name, Color3.fromRGB(255, 0, 0), 14, Enum.Font.SourceSansBold
-    else
-        pcall(function() targetFrame[espName.."Text"].TextLabel.Text = customName or targetFrame.Name end)
-    end
-end
-
--- Оптимизированный сканер для ЕСП (Игроки + Боты)
-task.spawn(function()
-    while task.wait(1.5) do
-        pcall(function()
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character then
-                    applyPlayersESP(p.Character, p.DisplayName or p.Name)
-                end
+-- Функция для поиска случайного живого игрока (не Гренни)
+local function getRandomAlly()
+    local allies = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local nL = string.lower(p.Name)
+            local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
+            if not isGranny then
+                table.insert(allies, p.Character.HumanoidRootPart)
             end
-            for _, obj in pairs(Workspace:GetChildren()) do
-                if obj:IsA("Model") and obj.Parent ~= Players then
-                    local oLower = string.lower(obj.Name)
-                    if string.find(oLower, "granny") or string.find(oLower, "grandpa") or string.find(oLower, "monster") then
-                        local isRealPlayer = Players:GetPlayerFromCharacter(obj)
-                        applyPlayersESP(obj, isRealPlayer and (isRealPlayer.DisplayName or isRealPlayer.Name) or "Bot")
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- СОВМЕЩЕННАЯ СИСТЕМА ЗАЩИТЫ (ANTI-KILL + TRAP В ОДНОМ ЦИКЛЕ)
-task.spawn(function()
-    while task.wait(0.05) do
-        if _G.AntiKillTrap_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            pcall(function()
-                local myRoot = LocalPlayer.Character.HumanoidRootPart
-                
-                -- 1. Защита от капканов (Bear Traps)
-                for _, obj in pairs(Workspace:GetChildren()) do
-                    local oName = string.lower(obj.Name)
-                    if string.find(oName, "trap") or string.find(oName, "beartrap") then
-                        local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart", true)
-                        if part then
-                            if (myRoot.Position - part.Position).Magnitude < 6 then
-                                myRoot.CFrame = myRoot.CFrame * CFrame.new(0, 0, -10) -- Рывок вперед
-                                return
-                            end
-                        end
-                    end
-                end
-
-                -- 2. Защита Anti-Kill (Телепорт к рандомному игроку)
-                local dangerTarget = nil
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        local nL, cL = string.lower(p.Name), string.lower(p.Character.Name)
-                        local isGranny = string.find(nL, "granny") or string.find(cL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
-                        if isGranny then dangerTarget = p.Character.HumanoidRootPart break end
-                    end
-                end
-                if not dangerTarget then
-                    for _, obj in pairs(Workspace:GetChildren()) do
-                        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") then
-                            if string.find(string.lower(obj.Name), "granny") or string.find(string.lower(obj.Name), "grandpa") then dangerTarget = obj.HumanoidRootPart break end
-                        end
-                    end
-                end
-                
-                if dangerTarget and (myRoot.Position - dangerTarget.Position).Magnitude < 8 then
-                    local allies = {}
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local nL = string.lower(p.Name)
-                            local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny"))
-                            if not isGranny then table.insert(allies, p.Character.HumanoidRootPart) end
-                        end
-                    end
-                    if #allies > 0 then
-                        myRoot.CFrame = allies[math.random(1, #allies)].CFrame + Vector3.new(0, 2, 0)
-                    else
-                        myRoot.CFrame = myRoot.CFrame + Vector3.new(0, 25, 0)
-                    end
-                end
-            end)
         end
     end
-end)
+    if #allies > 0 then
+        return allies[math.random(1, #allies)]
+    end
+    return nil
+end
+
+-- СИСТЕМА ДЕТЕКТА ХИТБОКСОВ (Touched-Based Anti-Kill & Anti-Trap)
+local function setupHitboxProtection(character)
+    local root = character:WaitForChild("HumanoidRootPart", 5)
+    if not root then return end
+    
+    root.Touched:Connect(function(hit)
+        if not _G.AntiKillTrap_Enabled then return end
+        if not hit or not hit.Parent then return end
+        
+        local model = hit.Parent
+        local modelName = string.lower(model.Name)
+        local hitName = string.lower(hit.Name)
+        
+        -- 1. ЕСЛИ НАШ ХИТБОКС СТОЛКНУЛСЯ С ГРЕННИ
+        local isMonster = string.find(modelName, "granny") or string.find(modelName, "grandpa") or string.find(modelName, "monster") or string.find(hitName, "bat") or string.find(hitName, "weapon") or string.find(hitName, "stick")
+        local hitPlayer = Players:GetPlayerFromCharacter(model)
+        if hitPlayer and hitPlayer.Team and string.find(string.lower(hitPlayer.Team.Name), "granny") then
+            isMonster = true
+        end
+        
+        if isMonster then
+            local targetAlly = getRandomAlly()
+            if targetAlly then
+                root.CFrame = targetAlly.CFrame + Vector3.new(0, 2, 0)
+            else
+                root.CFrame = root.CFrame + Vector3.new(0, 35, 0)
+            end
+            return
+        end
+        
+        -- 2. ЕСЛИ НАШ ХИТБОКС НАСТУПИЛ НА КАПКАН
+        if string.find(modelName, "trap") or string.find(hitName, "trap") or string.find(modelName, "beartrap") or string.find(hitName, "beartrap") then
+            task.wait(0.05)
+            local targetAlly = getRandomAlly()
+            if targetAlly then
+                root.CFrame = targetAlly.CFrame + Vector3.new(0, 2, 0)
+            else
+                root.CFrame = root.CFrame + Vector3.new(0, 35, 0)
+            end
+        end
+    end)
+end
+
+if LocalPlayer.Character then setupHitboxProtection(LocalPlayer.Character) end
+LocalPlayer.CharacterAdded:Connect(setupHitboxProtection)
+
+-- Функция управления зумом (Теперь ты сам крутишь мышку дальше/ближе!)
+local function toggleThirdPerson(enable)
+    pcall(function()
+        if enable then
+            LocalPlayer.CameraMaxZoomDistance = 150
+            LocalPlayer.CameraMinZoomDistance = 0.5
+            LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        else
+            LocalPlayer.CameraMaxZoomDistance = 12
+            LocalPlayer.CameraMinZoomDistance = 0.5
+            LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        end
+    end)
+end
 -- PART 2
 -- Главный фрейм UI
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -204,9 +174,10 @@ local function updateMenuDisplay()
         end
         
         local vG; vG = makeVisBtn(_G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF", _G.PlayersESP_Enabled, function() _G.PlayersESP_Enabled = not _G.PlayersESP_Enabled vG.BackgroundColor3, vG.Text = _G.PlayersESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
-        local v3; v3 = makeVisBtn(_G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF", _G.ThirdPerson_Enabled, function() _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled v3.BackgroundColor3, v3.Text = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
+        local v3; v3 = makeVisBtn(_G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF", _G.ThirdPerson_Enabled, function() _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled toggleThirdPerson(_G.ThirdPerson_Enabled) v3.BackgroundColor3, v3.Text = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
+        local vUL; vUL = makeVisBtn(_G.MouseUnlock_Enabled and "Unlock Mouse: ON" or "Unlock Mouse: OFF", _G.MouseUnlock_Enabled, function() _G.MouseUnlock_Enabled = not _G.MouseUnlock_Enabled vUL.BackgroundColor3, vUL.Text = _G.MouseUnlock_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.MouseUnlock_Enabled and "Unlock Mouse: ON" or "Unlock Mouse: OFF" end)
         
-        SF.CanvasSize = UDim2.new(0, 0, 0, 90)
+        SF.CanvasSize = UDim2.new(0, 0, 0, 130)
         return
     end
     
@@ -226,7 +197,6 @@ local function updateMenuDisplay()
         SubNavFrame.Visible = true
         SF.Position, SF.Size = UDim2.new(0.05, 0, 0.25, 0), UDim2.new(0.9, 0, 0, 195)
         
-        -- КНОПКА ANTI-KILL + TRAP (Добавлена на самый верх вкладки PLAYER)
         te = te + 1
         local vAK = Instance.new("TextButton", SF)
         vAK.Size, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = UDim2.new(1, 0, 0, 35), _G.AntiKillTrap_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), _G.AntiKillTrap_Enabled and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
