@@ -235,10 +235,8 @@ _G.updateMenuDisplay = function()
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
-    
     if _G.cM == "Visuals" then
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
-        
         local vG = Instance.new("TextButton", SF)
         vG.Size, vG.BackgroundColor3, vG.Font, vG.Text, vG.TextColor3, vG.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", Color3.fromRGB(255, 255, 255), 13
         Instance.new("UICorner", vG).CornerRadius = UDim.new(0, 5)
@@ -247,7 +245,6 @@ _G.updateMenuDisplay = function()
             vG.BackgroundColor3 = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
             vG.Text = shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF"
         end)
-        
         local v3 = Instance.new("TextButton", SF)
         v3.Size, v3.BackgroundColor3, v3.Font, v3.Text, v3.TextColor3, v3.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", Color3.fromRGB(255, 255, 255), 13
         Instance.new("UICorner", v3).CornerRadius = UDim.new(0, 5)
@@ -257,10 +254,8 @@ _G.updateMenuDisplay = function()
             v3.BackgroundColor3 = shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
             v3.Text = shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF"
         end)
-        
         te = 2 SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
     end
-    
     if _G.cM == "Granny" then
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, SF.Position, SF.Size = false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
@@ -297,15 +292,19 @@ _G.updateMenuDisplay = function()
                     local customButtonName = targetObj.Name
                     local nameLower = string.lower(customButtonName) local iV = false local isJunk = false
                     for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
+                    
+                    -- ТОТАЛЬНЫЙ БЛЕКЛИСТ НА ЛЮБОЕ УПОМИНАНИЕ КОЛЁС
+                    if string.find(nameLower, "wheel") then isJunk = true end
+                    
                     if not isJunk then
                         if _G.cS == "Items" then
-                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark") or string.find(nameLower, "wheel")
+                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark")
                             local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
                             
                             if isItemException then iV = true
                             elseif not isEscapeObject then for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
                         elseif _G.cS == "TELEPORT" then
-                            local isItemObject = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse") or string.find(nameLower, "pliers") or string.find(nameLower, "shotgun") or string.find(nameLower, "plank") or string.find(nameLower, "wheel")
+                            local isItemObject = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse") or string.find(nameLower, "pliers") or string.find(nameLower, "shotgun") or string.find(nameLower, "plank")
                             if not isItemObject then
                                 local isEscapeMatch = false
                                 for _, kw in pairs(eK) do if string.find(nameLower, kw) then isEscapeMatch = true break end end
