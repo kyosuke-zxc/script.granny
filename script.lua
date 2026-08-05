@@ -1,36 +1,32 @@
--- ВСТАВЛЯЕМ СТРОГО НА 1-Ю СТРОЧКУ (Авто-ожидание спавна)
+-- PART 1
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    LocalPlayer.CharacterAdded:Wait()
-    task.wait(1) -- Безопасная секундная пауза, чтобы карта прогрузилась
+-- Авто-ожидание спавна персонажа
+while not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") do
+    task.wait(0.5)
 end
+task.wait(0.5)
 
--- Дальше идет твой обычный код...
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 
--- Удаляем старый UI, если скрипт перезапускается
 if CoreGui:FindFirstChild("GrannyPremiumClean") then
     CoreGui["GrannyPremiumClean"]:Destroy()
 end
 
--- Simple ON/OFF Toggles (No laggy sliders)
-_G.GrannyESP_Enabled = false
-_G.TeammateESP_Enabled = false
+_G.PlayersESP_Enabled = false
 _G.ThirdPerson_Enabled = false
+_G.AntiKill_Enabled = false
 
--- Reliable Camera Controller Matrix (Handles FOV & 3rd Person Toggle)
+-- Матрица камеры (FOV и 3rd Person)
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
             if _G.ThirdPerson_Enabled then
                 LocalPlayer.CameraMaxZoomDistance = 35
                 LocalPlayer.CameraMinZoomDistance = 5
-                if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-                    LocalPlayer.CameraMode = Enum.CameraMode.Classic
-                end
+                if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then LocalPlayer.CameraMode = Enum.CameraMode.Classic end
             else
                 LocalPlayer.CameraMaxZoomDistance = 12
                 LocalPlayer.CameraMinZoomDistance = 0.5
@@ -39,13 +35,13 @@ task.spawn(function()
         end)
     end
 end)
--- Clean ESP Builder (Name Only)
-local function applyCustomESP(targetFrame, isMonster)
-    local espName = isMonster and "GrannyRedESP" or "TeammateGreenESP"
-    local espColor = isMonster and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
-    local isEnabled = isMonster and _G.GrannyESP_Enabled or _G.TeammateESP_Enabled
+
+-- Кастомная функция ЕСП (Все игроки КРАСНЫЕ)
+local function applyPlayersESP(targetFrame, customName)
+    if not targetFrame or not targetFrame.Parent then return end
+    local espName = "UniversalRedESP"
     
-    if not isEnabled then
+    if not _G.PlayersESP_Enabled then
         if targetFrame:FindFirstChild(espName) then targetFrame[espName]:Destroy() end
         if targetFrame:FindFirstChild(espName.."Text") then targetFrame[espName.."Text"]:Destroy() end
         return
@@ -53,49 +49,38 @@ local function applyCustomESP(targetFrame, isMonster)
     
     if not targetFrame:FindFirstChild(espName) then
         local hl = Instance.new("Highlight", targetFrame)
-        hl.Name = espName
-        hl.FillColor = espColor
-        hl.FillTransparency = 0.6
-        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.Name, hl.FillColor, hl.FillTransparency, hl.OutlineColor = espName, Color3.fromRGB(255, 0, 0), 0.5, Color3.fromRGB(255, 255, 255)
     end
     
     if not targetFrame:FindFirstChild(espName.."Text") then
         local bgui = Instance.new("BillboardGui", targetFrame)
-        bgui.Name = espName.."Text"
-        bgui.Size = UDim2.new(0, 150, 0, 40)
-        bgui.AlwaysOnTop = true
-        bgui.StudsOffset = Vector3.new(0, 3, 0)
-        
+        bgui.Name, bgui.Size, bgui.AlwaysOnTop, bgui.StudsOffset = espName.."Text", UDim2.new(0, 150, 0, 40), true, Vector3.new(0, 3, 0)
         local label = Instance.new("TextLabel", bgui)
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.Text = targetFrame.Name
-        label.TextColor3 = espColor
-        label.TextSize = 14
-        label.Font = Enum.Font.SourceSansBold
+        label.Size, label.BackgroundTransparency, label.Text, label.TextColor3, label.TextSize, label.Font = UDim2.new(1, 0, 1, 0), 1, customName or targetFrame.Name, Color3.fromRGB(255, 0, 0), 14, Enum.Font.SourceSansBold
+    else
+        pcall(function() targetFrame[espName.."Text"].TextLabel.Text = customName or targetFrame.Name end)
     end
 end
 
--- Thread Scanner for ESP
+-- Потоковый сканер для ЕСП (Игроки + Боты)
 task.spawn(function()
     while task.wait(1) do
         pcall(function()
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character then
-                    local nLower = string.lower(p.Name)
-                    local charLower = string.lower(p.Character.Name)
-                    if string.find(nLower, "granny") or string.find(charLower, "granny") or string.find(nLower, "grandpa") or string.find(charLower, "grandpa") then
-                        applyCustomESP(p.Character, true)
-                    else
-                        applyCustomESP(p.Character, false)
-                    end
+                    applyPlayersESP(p.Character, p.DisplayName or p.Name)
                 end
             end
             for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("Model") and obj.Parent ~= Players then
+                if obj:IsA("Model") and obj.Parent ~= Players and obj.Parent then
                     local oLower = string.lower(obj.Name)
-                    if string.find(oLower, "granny") or string.find(oLower, "grandpa") or string.find(oLower, "monster") or string.find(oLower, "slendrina") then
-                        applyCustomESP(obj, true)
+                    if string.find(oLower, "granny") or string.find(oLower, "grandpa") or string.find(oLower, "monster") then
+                        local isRealPlayer = Players:GetPlayerFromCharacter(obj)
+                        if isRealPlayer then
+                            applyPlayersESP(obj, isRealPlayer.DisplayName or isRealPlayer.Name)
+                        else
+                            applyPlayersESP(obj, "Bot")
+                        end
                     end
                 end
             end
@@ -103,91 +88,113 @@ task.spawn(function()
     end
 end)
 
--- Main UI Frames
+-- СИСТЕМА ANTI-KILL + ЗАЩИТА ОТ КАПКАНОВ (Bear Traps)
+task.spawn(function()
+    while task.wait(0.05) do
+        if _G.AntiKill_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            pcall(function()
+                local myRoot = LocalPlayer.Character.HumanoidRootPart
+                
+                -- 1. ПРОВЕРКА НА КАПКАНЫ (Bear Traps) - ТЕЛЕПОРТ НА 10 СТУДИЙ ВПЕРЕД
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") or obj:IsA("Model") then
+                        local oName = string.lower(obj.Name)
+                        if string.find(oName, "trap") or string.find(oName, "beartrap") then
+                            local trapPos = obj:IsA("Model") and (obj.PrimaryPart and obj.PrimaryPart.Position or obj:FindFirstChildWhichIsA("BasePart", true).Position) or obj.Position
+                            if trapPos then
+                                local trapDist = (myRoot.Position - trapPos).Magnitude
+                                if trapDist < 6 then
+                                    myRoot.CFrame = myRoot.CFrame * CFrame.new(0, 0, -10)
+                                    return
+                                end
+                            end
+                        end
+                    end
+                end
+
+                -- 2. ПРОВЕРКА НА БАБКУ
+                local dangerTarget = nil
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local nL, cL = string.lower(p.Name), string.lower(p.Character.Name)
+                        local isGranny = string.find(nL, "granny") or string.find(cL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
+                        if isGranny then dangerTarget = p.Character.HumanoidRootPart break end
+                    end
+                end
+                if not dangerTarget then
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj.Parent ~= Players then
+                            if string.find(string.lower(obj.Name), "granny") or string.find(string.lower(obj.Name), "grandpa") then dangerTarget = obj.HumanoidRootPart break end
+                        end
+                    end
+                end
+                
+                if dangerTarget then
+                    local dist = (myRoot.Position - dangerTarget.Position).Magnitude
+                    if dist < 8 then
+                        -- СБОР ВСЕХ ЖИВЫХ СОЮЗНИКОВ ДЛЯ СЛУЧАЙНОГО ПОБЕГА
+                        local allies = {}
+                        for _, p in pairs(Players:GetPlayers()) do
+                            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                                local nL = string.lower(p.Name)
+                                local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny"))
+                                if not isGranny then
+                                    table.insert(allies, p.Character.HumanoidRootPart)
+                                end
+                            end
+                        end
+                        
+                        -- Телепортируем к СЛУЧАЙНОМУ другу из таблицы, а если сервак пустой — на 25 студий вверх
+                        if #allies > 0 then
+                            local randomAlly = allies[math.random(1, #allies)]
+                            myRoot.CFrame = randomAlly.CFrame + Vector3.new(0, 2, 0)
+                        else
+                            myRoot.CFrame = myRoot.CFrame + Vector3.new(0, 25, 0)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+-- PART 2
+-- Главный фрейм UI
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "GrannyPremiumClean"
-ScreenGui.ResetOnSpawn = false
+ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name = "MainFrame"
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-MainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
-MainFrame.Size = UDim2.new(0, 260, 0, 350)
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active, MainFrame.Draggable = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true, true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
-local PlayerTabBtn = Instance.new("TextButton", MainFrame)
-PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-PlayerTabBtn.Position = UDim2.new(0.04, 0, 0.03, 0)
-PlayerTabBtn.Size = UDim2.new(0.29, 0, 0, 35)
-PlayerTabBtn.Font = Enum.Font.SourceSansBold
-PlayerTabBtn.Text = "PLAYER"
-PlayerTabBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
-PlayerTabBtn.TextSize = 12
-
-local GrannyTabBtn = Instance.new("TextButton", MainFrame)
-GrannyTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-GrannyTabBtn.Position = UDim2.new(0.35, 0, 0.03, 0)
-GrannyTabBtn.Size = UDim2.new(0.29, 0, 0, 35)
-GrannyTabBtn.Font = Enum.Font.SourceSansBold
-GrannyTabBtn.Text = "GRANNY"
-GrannyTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-GrannyTabBtn.TextSize = 12
-
-local VisualsTabBtn = Instance.new("TextButton", MainFrame)
-VisualsTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-VisualsTabBtn.Position = UDim2.new(0.66, 0, 0.03, 0)
-VisualsTabBtn.Size = UDim2.new(0.3, 0, 0, 35)
-VisualsTabBtn.Font = Enum.Font.SourceSansBold
-VisualsTabBtn.Text = "VISUALS"
-VisualsTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-VisualsTabBtn.TextSize = 12
-
-local SubNavFrame = Instance.new("Frame", MainFrame)
-SubNavFrame.Name = "SubNavFrame"
-SubNavFrame.BackgroundTransparency = 1
-SubNavFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-SubNavFrame.Size = UDim2.new(0.9, 0, 0, 30)
-
-local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
-ItemsSubBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-ItemsSubBtn.Size = UDim2.new(0.48, 0, 1, 0)
-ItemsSubBtn.Font = Enum.Font.SourceSansBold
-ItemsSubBtn.Text = "ITEMS"
-ItemsSubBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
-ItemsSubBtn.TextSize = 12
-
-local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
-EscapesSubBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-EscapesSubBtn.Position = UDim2.new(0.52, 0, 0, 0)
-EscapesSubBtn.Size = UDim2.new(0.48, 0, 1, 0)
-EscapesSubBtn.Font = Enum.Font.SourceSansBold
-EscapesSubBtn.Text = "TELEPORT"
-EscapesSubBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-EscapesSubBtn.TextSize = 12
-
-for _, btn in pairs({PlayerTabBtn, GrannyTabBtn, VisualsTabBtn, ItemsSubBtn, EscapesSubBtn}) do
-    local c = Instance.new("UICorner", btn)
-    c.CornerRadius = UDim.new(0, 5)
+local function createTab(name, text, posX)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.03, 0), UDim2.new(0.29, 0, 0, 35), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    return btn
 end
 
-local SF = Instance.new("ScrollingFrame", MainFrame)
-SF.BackgroundTransparency = 1
-SF.ScrollBarThickness = 6
+local PlayerTabBtn = createTab("PlayerTabBtn", "PLAYER", 0.04)
+local GrannyTabBtn = createTab("GrannyTabBtn", "GRANNY", 0.35)
+local VisualsTabBtn = createTab("VisualsTabBtn", "VISUALS", 0.66)
 
+local SubNavFrame = Instance.new("Frame", MainFrame)
+SubNavFrame.Name, SubNavFrame.BackgroundTransparency, SubNavFrame.Position, SubNavFrame.Size = "SubNavFrame", 1, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 30)
+
+local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
+ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 12
+Instance.new("UICorner", ItemsSubBtn).CornerRadius = UDim.new(0, 5)
+
+local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
+EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "TELEPORT", Color3.fromRGB(200, 200, 200), 12
+Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
+
+local SF = Instance.new("ScrollingFrame", MainFrame)
+SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
-LY.SortOrder = Enum.SortOrder.LayoutOrder
-LY.Padding = UDim.new(0, 5)
+LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
 
 local RB = Instance.new("TextButton", MainFrame)
-RB.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-RB.Position = UDim2.new(0.05, 0, 0.86, 0)
-RB.Size = UDim2.new(0.9, 0, 0, 35)
-RB.Font = Enum.Font.SourceSansBold
-RB.Text = "REFRESH LIST"
-RB.TextColor3 = Color3.fromRGB(255, 255, 255)
-RB.TextSize = 14
+RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
 _G.cM, _G.cS = "Player", "Items"
@@ -195,108 +202,54 @@ _G.cM, _G.cS = "Player", "Items"
 local iK = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon"}
 local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
 local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
-local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture"}
+local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "car1", "leftcar", "niga"}
+-- PART 3
 local function updateMenuDisplay()
     for _, child in pairs(SF:GetChildren()) do
         if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end
     end
     local ad, te = {}, 0
     
-    -- Синхронизация подсветки кнопок вкладок при переключении
-    PlayerTabBtn.BackgroundColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40)
-    PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
-    GrannyTabBtn.BackgroundColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40)
-    GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
-    VisualsTabBtn.BackgroundColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40)
-    VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+    PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+    GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+    VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
 
-    -- Рендеринг вкладки VISUALS с кнопками-переключателями
     if _G.cM == "Visuals" then
         SubNavFrame.Visible = false
-        SF.Position = UDim2.new(0.05, 0, 0.16, 0)
-        SF.Size = UDim2.new(0.9, 0, 0, 225)
+        SF.Position, SF.Size = UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         
-        -- Кнопка ESP Granny (Красный)
-        local vG = Instance.new("TextButton", SF)
-        vG.Size = UDim2.new(1, 0, 0, 35)
-        vG.BackgroundColor3 = _G.GrannyESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
-        vG.Text = _G.GrannyESP_Enabled and "ESP Granny: ON (RED)" or "ESP Granny: OFF"
-        vG.TextColor3 = Color3.fromRGB(255, 255, 255)
-        vG.Font = Enum.Font.SourceSansBold
-        vG.TextSize = 13
-        Instance.new("UICorner", vG).CornerRadius = UDim.new(0, 5)
+        local function makeVisBtn(txt, state, cb)
+            local v = Instance.new("TextButton", SF)
+            v.Size, v.BackgroundColor3, v.Text, v.TextColor3, v.Font, v.TextSize = UDim2.new(1, 0, 0, 35), state and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), txt, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+            Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5)
+            v.MouseButton1Click:Connect(cb) return v
+        end
         
-        vG.MouseButton1Click:Connect(function()
-            _G.GrannyESP_Enabled = not _G.GrannyESP_Enabled
-            vG.BackgroundColor3 = _G.GrannyESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
-            vG.Text = _G.GrannyESP_Enabled and "ESP Granny: ON (RED)" or "ESP Granny: OFF"
-        end)
-        
-        -- Кнопка ESP Allies (Зеленый)
-        local vT = Instance.new("TextButton", SF)
-        vT.Size = UDim2.new(1, 0, 0, 35)
-        vT.BackgroundColor3 = _G.TeammateESP_Enabled and Color3.fromRGB(60, 255, 60) or Color3.fromRGB(45, 45, 50)
-        vT.Text = _G.TeammateESP_Enabled and "ESP Allies: ON (GREEN)" or "ESP Allies: OFF"
-        vT.TextColor3 = Color3.fromRGB(255, 255, 255)
-        vT.Font = Enum.Font.SourceSansBold
-        vT.TextSize = 13
-        Instance.new("UICorner", vT).CornerRadius = UDim.new(0, 5)
-        
-        vT.MouseButton1Click:Connect(function()
-            _G.TeammateESP_Enabled = not _G.TeammateESP_Enabled
-            vT.BackgroundColor3 = _G.TeammateESP_Enabled and Color3.fromRGB(60, 255, 60) or Color3.fromRGB(45, 45, 50)
-            vT.Text = _G.TeammateESP_Enabled and "ESP Allies: ON (GREEN)" or "ESP Allies: OFF"
-        end)
-
-        -- Кнопка вида от Третьего Лица
-        local v3 = Instance.new("TextButton", SF)
-        v3.Size = UDim2.new(1, 0, 0, 35)
-        v3.BackgroundColor3 = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50)
-        v3.Text = _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF"
-        v3.TextColor3 = Color3.fromRGB(255, 255, 255)
-        v3.Font = Enum.Font.SourceSansBold
-        v3.TextSize = 13
-        Instance.new("UICorner", v3).CornerRadius = UDim.new(0, 5)
-        
-        v3.MouseButton1Click:Connect(function()
-            _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled
-            v3.BackgroundColor3 = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50)
-            v3.Text = _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF"
-        end)
+        local vG; vG = makeVisBtn(_G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF", _G.PlayersESP_Enabled, function() _G.PlayersESP_Enabled = not _G.PlayersESP_Enabled vG.BackgroundColor3, vG.Text = _G.PlayersESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
+        local v3; v3 = makeVisBtn(_G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF", _G.ThirdPerson_Enabled, function() _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled v3.BackgroundColor3, v3.Text = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
+        local vAK; vAK = makeVisBtn(_G.AntiKill_Enabled and "Anti-Kill Mode: ON" or "Anti-Kill Mode: OFF", _G.AntiKill_Enabled, function() _G.AntiKill_Enabled = not _G.AntiKill_Enabled vAK.BackgroundColor3, vAK.Text = _G.AntiKill_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.AntiKill_Enabled and "Anti-Kill Mode: ON" or "Anti-Kill Mode: OFF" end)
         
         SF.CanvasSize = UDim2.new(0, 0, 0, 130)
         return
     end
+    
     if _G.cM == "Granny" then
-        SubNavFrame.Visible = false 
-        SF.Position = UDim2.new(0.05, 0, 0.16, 0)
-        SF.Size = UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible = false
+        SF.Position, SF.Size = UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1
                 local eB = Instance.new("TextButton", SF)
-                eB.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-                eB.Size = UDim2.new(1, 0, 0, 32)
-                eB.Font = Enum.Font.SourceSans
-                eB.Text = "  " .. p.Name
-                eB.TextColor3 = Color3.fromRGB(255, 255, 255)
-                eB.TextSize = 14
-                eB.TextXAlignment = Enum.TextXAlignment.Left
+                eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. p.Name, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                 Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                
-                eB.MouseButton1Click:Connect(function()
-                    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0)
-                    end
-                end)
+                eB.MouseButton1Click:Connect(function() pcall(function() if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end end) end)
             end
         end
     elseif _G.cM == "Player" then
-        SubNavFrame.Visible = true 
-        SF.Position = UDim2.new(0.05, 0, 0.25, 0)
-        SF.Size = UDim2.new(0.9, 0, 0, 195)
+        SubNavFrame.Visible = true
+        SF.Position, SF.Size = UDim2.new(0.05, 0, 0.25, 0), UDim2.new(0.9, 0, 0, 195)
         for _, obj in pairs(workspace:GetDescendants()) do
-            if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:IsDescendantOf(LocalPlayer.Character) then
+            if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
                 local nameLower = string.lower(obj.Name)
                 local iV, isJunk = false, false
                 
@@ -307,29 +260,18 @@ local function updateMenuDisplay()
                 if _G.cS == "Items" then
                     local tE = string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "truck") or string.find(nameLower, "helicopter")
                     local tL = string.find(nameLower, "lock") or string.find(nameLower, "trigger") or string.find(nameLower, "slot")
-                    
                     if not isJunk and not tE and not tL and not string.find(nameLower, "door") and not string.find(nameLower, "gate") then
-                        for _, kw in pairs(iK) do
-                            if string.find(nameLower, kw) and not string.find(nameLower, "wheel") then iV = true break end
-                        end
+                        for _, kw in pairs(iK) do if string.find(nameLower, kw) and not string.find(nameLower, "wheel") then iV = true break end end
                     end
-                elseif _G.cS == "Teleport" then
+                elseif _G.cS == "TELEPORT" then
                     local cK = string.find(nameLower, "key") or string.find(nameLower, "padlock") or string.find(nameLower, "hammer") or string.find(nameLower, "fuse")
-                    
                     if not cK and not string.find(nameLower, "furniture") then
                         local hE = false
-                        for _, kw in pairs(eK) do
-                            if string.find(nameLower, kw) then hE = true break end
-                        end
-                        
+                        for _, kw in pairs(eK) do if string.find(nameLower, kw) then hE = true break end end
                         if hE then
                             if string.find(nameLower, "door") or string.find(nameLower, "gate") then
-                                for allowedName, _ in pairs(eF) do
-                                    if string.find(nameLower, allowedName) then iV = true break end
-                                end
-                            else
-                                iV = true
-                            end
+                                for allowedName, _ in pairs(eF) do if string.find(nameLower, allowedName) then iV = true break end end
+                            else iV = true end
                         end
                         if string.find(nameLower, "wheel") or string.find(nameLower, "carengine") then iV = true end
                     end
@@ -339,25 +281,17 @@ local function updateMenuDisplay()
                     ad[obj.Name] = true
                     te = te + 1
                     local eB = Instance.new("TextButton", SF)
-                    eB.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-                    eB.Size = UDim2.new(1, 0, 0, 32)
-                    eB.Font = Enum.Font.SourceSans
-                    eB.Text = "  " .. obj.Name
-                    eB.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    eB.TextSize = 14
-                    eB.TextXAlignment = Enum.TextXAlignment.Left
+                    eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. obj.Name, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                     Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
                     
-                    eB.MouseButton1Click:Connect(function()
-                        local tC = obj:IsA("Model") and (obj.PrimaryPart and obj.PrimaryPart.CFrame or obj:FindFirstChildWhichIsA("BasePart", true).CFrame) or obj.CFrame
-                        if tC then
-                            if _G.cS == "Teleport" then
-                                LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5)
-                            else
-                                LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0)
+                    eB.MouseButton1Click:Connect(function() pcall(function()
+                        if obj and obj.Parent and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            local tC = obj:IsA("Model") and (obj.PrimaryPart and obj.PrimaryPart.CFrame or obj:FindFirstChildWhichIsA("BasePart", true).CFrame) or obj.CFrame
+                            if tC then
+                                if _G.cS == "TELEPORT" then LocalPlayer.Character.HumanoidRootPart.CFrame = tC * CFrame.new(0, 0, 5) else LocalPlayer.Character.HumanoidRootPart.CFrame = tC + Vector3.new(0, 3.5, 0) end
                             end
                         end
-                    end)
+                    end) end)
                 end
             end
         end
@@ -369,8 +303,8 @@ PlayerTabBtn.MouseButton1Click:Connect(function() _G.cM = "Player" updateMenuDis
 GrannyTabBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" updateMenuDisplay() end)
 VisualsTabBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" updateMenuDisplay() end)
 
-ItemsSubBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsSubBtn.TextColor3 = Color3.fromRGB(255, 60, 60) ItemsSubBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50) EscapesSubBtn.TextColor3 = Color3.fromRGB(200, 200, 200) EscapesSubBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40) updateMenuDisplay() end)
-EscapesSubBtn.MouseButton1Click:Connect(function() _G.cS = "Teleport" EscapesSubBtn.TextColor3 = Color3.fromRGB(255, 60, 60) EscapesSubBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50) ItemsSubBtn.TextColor3 = Color3.fromRGB(200, 200, 200) ItemsSubBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40) updateMenuDisplay() end)
+ItemsSubBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsSubBtn.TextColor3, ItemsSubBtn.BackgroundColor3, EscapesSubBtn.TextColor3, EscapesSubBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) updateMenuDisplay() end)
+EscapesSubBtn.MouseButton1Click:Connect(function() _G.cS = "TELEPORT" EscapesSubBtn.TextColor3, EscapesSubBtn.BackgroundColor3, ItemsSubBtn.TextColor3, ItemsSubBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) updateMenuDisplay() end)
 
 RB.MouseButton1Click:Connect(updateMenuDisplay)
 updateMenuDisplay()
