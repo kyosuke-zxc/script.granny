@@ -8,11 +8,14 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then
     CoreGui["GrannyPremiumClean"]:Destroy()
 end
 
-_G.PlayersESP_Enabled = false
-_G.ThirdPerson_Enabled = false
-_G.AntiKillTrap_Enabled = false
+-- Единая таблица настроек (Вместо лагающих глобалок _G)
+shared.CheatConfig = shared.CheatConfig or {
+    PlayersESP = false,
+    ThirdPerson = false,
+    AntiKillTrap = false
+}
 
--- ФУНКЦИЯ ДЛЯ ЗУМА (РАБОЧАЯ)
+-- Функция свободного зума (Вызывается строго один раз при клике!)
 local function toggleThirdPerson(enable)
     pcall(function()
         if enable then
@@ -27,7 +30,7 @@ local function toggleThirdPerson(enable)
     end)
 end
 
--- Поиск случайного выжившего
+-- Поиск случайного выжившего игрока на карте для побега
 local function getRandomAlly()
     local allies = {}
     for _, p in pairs(Players:GetPlayers()) do
@@ -40,10 +43,70 @@ local function getRandomAlly()
     return #allies > 0 and allies[math.random(1, #allies)] or nil
 end
 
+-- Кастомная функция ЕСП (Все игроки строго КРАСНЫЕ с фиксом имен)
+local function applyPlayersESP(targetFrame, customName)
+    if not targetFrame or not targetFrame.Parent then return end
+    local espName = "UniversalRedESP"
+    
+    if not shared.CheatConfig.PlayersESP then
+        if targetFrame:FindFirstChild(espName) then targetFrame[espName]:Destroy() end
+        if targetFrame:FindFirstChild(espName.."Text") then targetFrame[espName.."Text"]:Destroy() end
+        return
+    end
+    
+    if not targetFrame:FindFirstChild(espName) then
+        local hl = Instance.new("Highlight", targetFrame)
+        hl.Name = espName
+        hl.FillColor = Color3.fromRGB(255, 0, 0)
+        hl.FillTransparency = 0.5
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+    end
+    
+    if not targetFrame:FindFirstChild(espName.."Text") then
+        local bgui = Instance.new("BillboardGui", targetFrame)
+        bgui.Name = espName.."Text"
+        bgui.Size = UDim2.new(0, 150, 0, 40)
+        bgui.AlwaysOnTop = true
+        bgui.StudsOffset = Vector3.new(0, 3, 0)
+        
+        local label = Instance.new("TextLabel", bgui)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = customName or targetFrame.Name
+        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        label.TextSize = 14
+        label.Font = Enum.Font.SourceSansBold
+    else
+        pcall(function() targetFrame[espName.."Text"].TextLabel.Text = customName or targetFrame.Name end)
+    end
+end
+
+-- Потоковый сканер для ЕСП (Игроки + Боты)
+task.spawn(function()
+    while task.wait(1.5) do
+        pcall(function()
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character then
+                    applyPlayersESP(p.Character, p.DisplayName or p.Name)
+                end
+            end
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") and obj.Parent ~= Players and obj.Parent then
+                    local oLower = string.lower(obj.Name)
+                    if string.find(oLower, "granny") or string.find(oLower, "grandpa") or string.find(oLower, "monster") or string.find(oLower, "bot") then
+                        local isRealPlayer = Players:GetPlayerFromCharacter(obj)
+                        applyPlayersESP(obj, isRealPlayer and (isRealPlayer.DisplayName or isRealPlayer.Name) or "Bot")
+                    end
+                end
+            end
+        end)
+    end
+end)
+
 -- НАДЁЖНЫЙ ЦИКЛ ЗАЩИТЫ (ANTI-KILL + TRAP)
 task.spawn(function()
-    while task.wait(0.02) do -- Проверка каждые 20 миллисекунд
-        if _G.AntiKillTrap_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    while task.wait(0.01) do
+        if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             pcall(function()
                 local myRoot = LocalPlayer.Character.HumanoidRootPart
                 local needToTeleport = false
@@ -58,7 +121,7 @@ task.spawn(function()
                     end
                 end
                 
-                -- 2. Проверка дистанции до бабки
+                -- 2. Проверка дистанции до бабки/дедки (Радиус 14 студий для компенсации пинга)
                 if not needToTeleport then
                     local dangerTarget = nil
                     for _, p in pairs(Players:GetPlayers()) do
@@ -69,18 +132,18 @@ task.spawn(function()
                         end
                     end
                     if not dangerTarget then
-                        for _, obj in pairs(Workspace:GetChildren()) do
-                            if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and (string.find(string.lower(obj.Name), "granny") or string.find(string.lower(obj.Name), "grandpa")) then
-                                dangerTarget = obj.HumanoidRootPart break
+                        for _, o in pairs(Workspace:GetDescendants()) do
+                            if o:IsA("Model") and o:FindFirstChild("HumanoidRootPart") and (string.find(string.lower(o.Name), "granny") or string.find(string.lower(o.Name), "grandpa") or string.find(string.lower(o.Name), "bot")) then
+                                dangerTarget = o.HumanoidRootPart break
                             end
                         end
                     end
-                    if dangerTarget and (myRoot.Position - dangerTarget.Position).Magnitude < 9 then
+                    if dangerTarget and (myRoot.Position - dangerTarget.Position).Magnitude < 14 then
                         needToTeleport = true
                     end
                 end
                 
-                -- Выполняем телепорт к случайному игроку
+                -- Выполняем экстренный ТП
                 if needToTeleport then
                     local targetAlly = getRandomAlly()
                     if targetAlly then 
@@ -88,7 +151,7 @@ task.spawn(function()
                     else 
                         myRoot.CFrame = myRoot.CFrame + Vector3.new(0, 25, 0) 
                     end
-                    task.wait(0.5) -- Задержка, чтобы не тепало бесконечно
+                    task.wait(0.5)
                 end
             end)
         end
@@ -136,6 +199,7 @@ Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
 _G.cM, _G.cS = "Player", "Items"
 
+-- Полноразмерные таблицы фильтрации без сжатия кода
 local iK = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon"}
 local eK = {"car", "boat", "sewer", "helicopter", "gate", "garage", "truck", "main door", "double door"}
 local eF = {["main door"] = true, ["front gate"] = true, ["garage door"] = true, ["double door escape"] = true}
@@ -162,8 +226,8 @@ local function updateMenuDisplay()
             v.MouseButton1Click:Connect(cb) return v
         end
         
-        local vG; vG = makeVisBtn(_G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF", _G.PlayersESP_Enabled, function() _G.PlayersESP_Enabled = not _G.PlayersESP_Enabled vG.BackgroundColor3, vG.Text = _G.PlayersESP_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), _G.PlayersESP_Enabled and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
-        local v3; v3 = makeVisBtn(_G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF", _G.ThirdPerson_Enabled, function() _G.ThirdPerson_Enabled = not _G.ThirdPerson_Enabled toggleThirdPerson(_G.ThirdPerson_Enabled) v3.BackgroundColor3, v3.Text = _G.ThirdPerson_Enabled and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), _G.ThirdPerson_Enabled and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
+        local vG; vG = makeVisBtn(shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP vG.BackgroundColor3, vG.Text = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF" end)
+        local v3; v3 = makeVisBtn(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) v3.BackgroundColor3, v3.Text = shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 140, 0) or Color3.fromRGB(45, 45, 50), shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF" end)
         
         SF.CanvasSize = UDim2.new(0, 0, 0, 90)
         return
@@ -178,26 +242,26 @@ local function updateMenuDisplay()
                 local eB = Instance.new("TextButton", SF)
                 eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. p.Name, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                 Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                eB.MouseButton1Click:Connect(function() pcall(function() if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end end) end)
+                eB.MouseButton1Click:Connect(function() pcall(function() if p.Character and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then LP.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end end) end)
             end
         end
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
         SF.Position, SF.Size = UDim2.new(0.05, 0, 0.25, 0), UDim2.new(0.9, 0, 0, 195)
         
-        -- НАША ЕДИНАЯ КНОПКА ЗАЩИТЫ НА САМОМ ВЕРХУ ВКЛАДКИ PLAYER
+        -- Кнопка Anti-Kill + Trap на самый верх
         te = te + 1
         local vAK = Instance.new("TextButton", SF)
-        vAK.Size, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = UDim2.new(1, 0, 0, 35), _G.AntiKillTrap_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), _G.AntiKillTrap_Enabled and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+        vAK.Size, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
         Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
         
         vAK.MouseButton1Click:Connect(function()
-            _G.AntiKillTrap_Enabled = not _G.AntiKillTrap_Enabled
-            vAK.BackgroundColor3 = _G.AntiKillTrap_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
-            vAK.Text = _G.AntiKillTrap_Enabled and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF"
+            shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap
+            vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+            vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF"
         end)
         
-        for _, obj in pairs(workspace:GetDescendants()) do
+        for _, obj in pairs(Workspace:GetDescendants()) do
             if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
                 local nameLower = string.lower(obj.Name)
                 local iV, isJunk = false, false
