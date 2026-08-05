@@ -3,100 +3,21 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then
     CoreGui["GrannyPremiumClean"]:Destroy()
 end
 
--- Переключатели режимов
 _G.PlayersESP_Enabled = false
 _G.ThirdPerson_Enabled = false
 _G.AntiKillTrap_Enabled = false
-_G.MouseUnlock_Enabled = false -- Переключатель для Shift Lock Unclocker
 
--- Контроллер мыши (Shift Lock Unclocker)
-task.spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if _G.MouseUnlock_Enabled then
-                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-                LocalPlayer.DevEnableMouseLock = false
-            end
-        end)
-    end
-end)
-
--- Функция для поиска случайного живого игрока (не Гренни)
-local function getRandomAlly()
-    local allies = {}
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local nL = string.lower(p.Name)
-            local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
-            if not isGranny then
-                table.insert(allies, p.Character.HumanoidRootPart)
-            end
-        end
-    end
-    if #allies > 0 then
-        return allies[math.random(1, #allies)]
-    end
-    return nil
-end
-
--- СИСТЕМА ДЕТЕКТА ХИТБОКСОВ (Touched-Based Anti-Kill & Anti-Trap)
-local function setupHitboxProtection(character)
-    local root = character:WaitForChild("HumanoidRootPart", 5)
-    if not root then return end
-    
-    root.Touched:Connect(function(hit)
-        if not _G.AntiKillTrap_Enabled then return end
-        if not hit or not hit.Parent then return end
-        
-        local model = hit.Parent
-        local modelName = string.lower(model.Name)
-        local hitName = string.lower(hit.Name)
-        
-        -- 1. ЕСЛИ НАШ ХИТБОКС СТОЛКНУЛСЯ С ГРЕННИ
-        local isMonster = string.find(modelName, "granny") or string.find(modelName, "grandpa") or string.find(modelName, "monster") or string.find(hitName, "bat") or string.find(hitName, "weapon") or string.find(hitName, "stick")
-        local hitPlayer = Players:GetPlayerFromCharacter(model)
-        if hitPlayer and hitPlayer.Team and string.find(string.lower(hitPlayer.Team.Name), "granny") then
-            isMonster = true
-        end
-        
-        if isMonster then
-            local targetAlly = getRandomAlly()
-            if targetAlly then
-                root.CFrame = targetAlly.CFrame + Vector3.new(0, 2, 0)
-            else
-                root.CFrame = root.CFrame + Vector3.new(0, 35, 0)
-            end
-            return
-        end
-        
-        -- 2. ЕСЛИ НАШ ХИТБОКС НАСТУПИЛ НА КАПКАН
-        if string.find(modelName, "trap") or string.find(hitName, "trap") or string.find(modelName, "beartrap") or string.find(hitName, "beartrap") then
-            task.wait(0.05)
-            local targetAlly = getRandomAlly()
-            if targetAlly then
-                root.CFrame = targetAlly.CFrame + Vector3.new(0, 2, 0)
-            else
-                root.CFrame = root.CFrame + Vector3.new(0, 35, 0)
-            end
-        end
-    end)
-end
-
-if LocalPlayer.Character then setupHitboxProtection(LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(setupHitboxProtection)
-
--- Функция управления зумом (Теперь ты сам крутишь мышку дальше/ближе!)
+-- ФУНКЦИЯ ДЛЯ ЗУМА (РАБОЧАЯ)
 local function toggleThirdPerson(enable)
     pcall(function()
         if enable then
             LocalPlayer.CameraMaxZoomDistance = 150
-            LocalPlayer.CameraMinZoomDistance = 0.5
+            LocalPlayer.CameraMinZoomDistance = 5
             LocalPlayer.CameraMode = Enum.CameraMode.Classic
         else
             LocalPlayer.CameraMaxZoomDistance = 12
@@ -105,6 +26,74 @@ local function toggleThirdPerson(enable)
         end
     end)
 end
+
+-- Поиск случайного выжившего
+local function getRandomAlly()
+    local allies = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local nL = string.lower(p.Name)
+            local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
+            if not isGranny then table.insert(allies, p.Character.HumanoidRootPart) end
+        end
+    end
+    return #allies > 0 and allies[math.random(1, #allies)] or nil
+end
+
+-- НАДЁЖНЫЙ ЦИКЛ ЗАЩИТЫ (ANTI-KILL + TRAP)
+task.spawn(function()
+    while task.wait(0.02) do -- Проверка каждые 20 миллисекунд
+        if _G.AntiKillTrap_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            pcall(function()
+                local myRoot = LocalPlayer.Character.HumanoidRootPart
+                local needToTeleport = false
+                
+                -- 1. Проверка дистанции до капканов
+                for _, obj in pairs(Workspace:GetChildren()) do
+                    if string.find(string.lower(obj.Name), "trap") or string.find(string.lower(obj.Name), "beartrap") then
+                        local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart", true)
+                        if part and (myRoot.Position - part.Position).Magnitude < 6 then
+                            needToTeleport = true break
+                        end
+                    end
+                end
+                
+                -- 2. Проверка дистанции до бабки
+                if not needToTeleport then
+                    local dangerTarget = nil
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local nL, cL = string.lower(p.Name), string.lower(p.Character.Name)
+                            local isGranny = string.find(nL, "granny") or string.find(cL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
+                            if isGranny then dangerTarget = p.Character.HumanoidRootPart break end
+                        end
+                    end
+                    if not dangerTarget then
+                        for _, obj in pairs(Workspace:GetChildren()) do
+                            if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and (string.find(string.lower(obj.Name), "granny") or string.find(string.lower(obj.Name), "grandpa")) then
+                                dangerTarget = obj.HumanoidRootPart break
+                            end
+                        end
+                    end
+                    if dangerTarget and (myRoot.Position - dangerTarget.Position).Magnitude < 9 then
+                        needToTeleport = true
+                    end
+                end
+                
+                -- Выполняем телепорт к случайному игроку
+                if needToTeleport then
+                    local targetAlly = getRandomAlly()
+                    if targetAlly then 
+                        myRoot.CFrame = targetAlly.CFrame + Vector3.new(0, 2, 0)
+                    else 
+                        myRoot.CFrame = myRoot.CFrame + Vector3.new(0, 25, 0) 
+                    end
+                    task.wait(0.5) -- Задержка, чтобы не тепало бесконечно
+                end
+            end)
+        end
+    end
+end)
 -- PART 2
 -- Главный фрейм UI
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -196,6 +185,7 @@ local function updateMenuDisplay()
         SubNavFrame.Visible = true
         SF.Position, SF.Size = UDim2.new(0.05, 0, 0.25, 0), UDim2.new(0.9, 0, 0, 195)
         
+        -- НАША ЕДИНАЯ КНОПКА ЗАЩИТЫ НА САМОМ ВЕРХУ ВКЛАДКИ PLAYER
         te = te + 1
         local vAK = Instance.new("TextButton", SF)
         vAK.Size, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = UDim2.new(1, 0, 0, 35), _G.AntiKillTrap_Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), _G.AntiKillTrap_Enabled and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
@@ -255,7 +245,7 @@ local function updateMenuDisplay()
             end
         end
     end
-    SF.CanvasSize = UDim2.new(0, 0, 0, te * 130)
+    SF.CanvasSize = UDim2.new(0, 0, 0, te * 38)
 end
 
 PlayerTabBtn.MouseButton1Click:Connect(function() _G.cM = "Player" updateMenuDisplay() end)
