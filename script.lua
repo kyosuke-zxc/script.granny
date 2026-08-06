@@ -186,19 +186,18 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
-local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.25, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
-Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
-
--- ПОДНЯЛИ КНОПКУ АНТИКИЛЛА ВЫШЕ ЧТОБЫ УБРАТЬ ПУСТОТУ (с 0.34 на 0.26)
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.25, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
--- ПОДНЯЛИ ФРЕЙМ С КНОПКАМИ FLY И NOCLIP СЛЕДОМ (с 0.45 на 0.40)
+local SearchBox = Instance.new("TextBox", MainFrame)
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
+Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
+
+-- ПОДДВИНУЛИ КНОПКИ БЛИЖЕ К АНТИКИЛЛУ (с 0.38 на 0.36)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
-MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.40, 0), UDim2.new(0.9, 0, 0, 40)
+MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.36, 0), UDim2.new(0.9, 0, 0, 40)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
@@ -330,27 +329,23 @@ _G.updateMenuDisplay = function()
 -- part 5
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
-        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0.25, 0)
         
-        -- ЖЕСТКО ФИКСИРУЕМ РАЗМЕР И ПОЗИЦИЮ REFRESH (Как ты просил)
+        -- ПОЛНАЯ СИММЕТРИЯ: Кнопка Anti-Kill ВСЕГДА стоит на одном месте в 0.25
+        MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
+        MainFrame.AntiKillBtn.Visible = true
         MainFrame.Size = UDim2.new(0, 260, 0, 350)
         RB.Position = UDim2.new(0.05, 0, 0.86, 0)
         
         if _G.cS == "Movement" then
             MainFrame.SearchBox.Visible = false
-            MainFrame.AntiKillBtn.Visible = true
-            -- Меняем координаты Anti-Kill во вкладке Movement, чтобы она встала выше (скрывая серчбокс)
-            MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
             MainFrame.MoveControlsFrame.Visible = true
             SF.Visible = false
         else
             MainFrame.SearchBox.Visible = true
-            MainFrame.AntiKillBtn.Visible = true
-            -- Возвращаем дефолтную позицию Anti-Kill во вкладке ITEMS
-            MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.34, 0)
             MainFrame.MoveControlsFrame.Visible = false
             SF.Visible = true
-            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
+            -- Сдвинули начало скролл-списка предметов ниже (на 0.48), чтобы SearchBox его не перекрывал
+            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.48, 0), UDim2.new(0.9, 0, 0, 120)
             
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
