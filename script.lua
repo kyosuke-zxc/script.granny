@@ -182,7 +182,6 @@ local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
 ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 12
 Instance.new("UICorner", ItemsSubBtn).CornerRadius = UDim.new(0, 5)
 
--- КНОПКА ПОДМЕНЮ ТЕПЕРЬ НАЗЫВАЕТСЯ MOVEMENT
 local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
@@ -196,7 +195,6 @@ vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
--- ПАНЕЛЬ С КНОПКАМИ ПОЛЕТА И НОКЛИПА
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 40)
 
@@ -234,7 +232,6 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
 
--- ЦИКЛ С КЛИП ДВИЖКА
 game:GetService("RunService").Stepped:Connect(function()
     if shared.CheatConfig.Noclip and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -243,7 +240,6 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- ЦИКЛ ФЛАЙ СИСТЕМЫ
 local flySpeed = 50
 game:GetService("RunService").RenderStepped:Connect(function()
     if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
@@ -283,12 +279,17 @@ local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture",
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
     local ad, te = {}, 0
+    
+    -- ГАРАНТИРУЕМ ЧТО ВЕРХНИЕ ВКЛАДКИ ВСЕГДА ОСТАЮТСЯ НА ЭКРАНЕ И НЕ ИСЧЕЗАЮТ
+    PlayerTabBtn.Visible, GrannyTabBtn.Visible, VisualsTabBtn.Visible = true, true, true
+    
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Position, SF.Size = false, false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        
         local vG = Instance.new("TextButton", SF)
         vG.Size, vG.BackgroundColor3, vG.Font, vG.Text, vG.TextColor3, vG.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", Color3.fromRGB(255, 255, 255), 13
         Instance.new("UICorner", vG).CornerRadius = UDim.new(0, 5)
@@ -297,6 +298,7 @@ _G.updateMenuDisplay = function()
             vG.BackgroundColor3 = shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
             vG.Text = shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF"
         end)
+        
         local v3 = Instance.new("TextButton", SF)
         v3.Size, v3.BackgroundColor3, v3.Font, v3.Text, v3.TextColor3, v3.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", Color3.fromRGB(255, 255, 255), 13
         Instance.new("UICorner", v3).CornerRadius = UDim.new(0, 5)
@@ -306,10 +308,12 @@ _G.updateMenuDisplay = function()
             v3.BackgroundColor3 = shared.CheatConfig.ThirdPerson and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50)
             v3.Text = shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF"
         end)
+        
         te = 2 SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
     end
+    
     if _G.cM == "Granny" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Position, SF.Size = false, false, false, false, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1 local eB = Instance.new("TextButton", SF)
@@ -320,15 +324,17 @@ _G.updateMenuDisplay = function()
         end
 -- part 5
     elseif _G.cM == "Player" then
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible = true, true, true
+        SubNavFrame.Visible = true
         
-        -- УДАЛИЛИ СПИСКИ ЗОН ПОБЕГА. Теперь во вкладке MOVEMENT отображаются строго кнопки управления полетом
+        -- ЖЁСТКИЙ ФИКС СТРОКИ ПОИСКА: Скрываем её полностью без чёрных полосок
         if _G.cS == "Movement" then
-            MainFrame.SearchBox.Visible = false -- Скрываем строку поиска во вкладке перемещения
+            MainFrame.SearchBox.Visible = false
+            MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = true
-            SF.Visible = false -- Полностью убираем зону скроллинга, так как объектов тут больше нет
+            SF.Visible = false
         else
             MainFrame.SearchBox.Visible = true
+            MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = false
             SF.Visible = true
             SF.Position, SF.Size = UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
@@ -354,22 +360,25 @@ _G.updateMenuDisplay = function()
                         end
                         
                         local customButtonName = targetObj.Name
-                        local nameLower = string.lower(customButtonName) local iV = false
+                        local nameLower = string.lower(customButtonName) local iV = false local isJunk = false
                         for _, junk in pairs(sJ) do if string.find(nameLower, junk) then isJunk = true break end end
-                        if string.find(nameLower, "wheel") and not (string.find(nameLower, "car") or string.find(nameLower, "escape")) then isJunk = true end
+                        
+                        if string.find(nameLower, "wheel") then isJunk = true end
                         
                         if not isJunk then
-                            local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark")
-                            local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
-                            
-                            if isItemException then iV = true
-                            elseif not isEscapeObject then 
-                                local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                if hasItemTrigger then iV = true
-                                else for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
+                            if _G.cS == "Items" then
+                                local isItemException = string.find(nameLower, "battery") or string.find(nameLower, "spark")
+                                local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter") or string.find(nameLower, "sewer") or string.find(nameLower, "truck")
+                                
+                                if isItemException then iV = true
+                                elseif not isEscapeObject then 
+                                    local hasItemTrigger = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                    if hasItemTrigger then iV = true
+                                    else for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
+                                end
                             end
+                            if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
                         end
-                        if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
                         
                         if iV and not ad[customButtonName] and not Players:GetPlayerFromCharacter(targetObj) then
                             ad[customButtonName] = true te = te + 1
