@@ -5,6 +5,7 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")  -- for intro animation
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
@@ -219,13 +220,35 @@ end)
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
+
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
+MainFrame.Name = "MainFrame"
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Size = UDim2.new(0, 260, 0, 380)   -- slightly taller for title
+MainFrame.Active = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
--- part 4
+
+-- Center the GUI initially (will be animated)
+MainFrame.Position = UDim2.new(0.5, -130, 0.5, -190)  -- center based on size
+MainFrame.BackgroundTransparency = 1   -- start invisible for intro
+MainFrame.Size = UDim2.new(0, 0, 0, 0) -- start scaled down
+
+-- Title: "Kyo Hub"
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "Kyo Hub"
+Title.TextColor3 = Color3.fromRGB(255, 80, 80)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 22
+Title.TextScaled = false
+Title.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Part 4 (tabs and controls, adjusted Y offsets to fit title)
 local function createTab(name, text, posX)
     local btn = Instance.new("TextButton", MainFrame)
-    btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.03, 0), UDim2.new(0.29, 0, 0, 35), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
+    btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.12, 0), UDim2.new(0.29, 0, 0, 30), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5) return btn
 end
 local PlayerTabBtn = createTab("PlayerTabBtn", "PLAYER", 0.04)
@@ -233,29 +256,29 @@ local GrannyTabBtn = createTab("GrannyTabBtn", "GRANNY", 0.35)
 local VisualsTabBtn = createTab("VisualsTabBtn", "VISUALS", 0.66)
 
 local SubNavFrame = Instance.new("Frame", MainFrame)
-SubNavFrame.Name, SubNavFrame.BackgroundTransparency, SubNavFrame.Position, SubNavFrame.Size = "SubNavFrame", 1, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 30)
+SubNavFrame.Name, SubNavFrame.BackgroundTransparency, SubNavFrame.Position, SubNavFrame.Size = "SubNavFrame", 1, UDim2.new(0.05, 0, 0.24, 0), UDim2.new(0.9, 0, 0, 25)
 local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
-ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 12
+ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 11
 Instance.new("UICorner", ItemsSubBtn).CornerRadius = UDim.new(0, 5)
 local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
-EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
+EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 11
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.34, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 22), UDim2.new(0.05, 0, 0.46, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 11, Enum.Font.SourceSans, "Type item name...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- Movement Controls Frame (Fly & Noclip only)
+-- Movement Controls Frame
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
-MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
-MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 40)
+MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.46, 0)
+MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 35)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name = "FlyBtn"
@@ -265,7 +288,7 @@ FlyBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 FlyBtn.Font = Enum.Font.SourceSansBold
 FlyBtn.Text = "Fly: OFF"
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.TextSize = 13
+FlyBtn.TextSize = 12
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
@@ -276,17 +299,30 @@ NoclipBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 NoclipBtn.Font = Enum.Font.SourceSansBold
 NoclipBtn.Text = "Noclip: OFF"
 NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoclipBtn.TextSize = 13
+NoclipBtn.TextSize = 12
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
-LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
+LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 local RB = Instance.new("TextButton", MainFrame)
-RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
+RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.88, 0), UDim2.new(0.9, 0, 0, 30), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
+-- Intro Animation: fade in + scale up
+MainFrame.BackgroundTransparency = 1
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+MainFrame.Position = UDim2.new(0.5, -130, 0.5, -190) -- keep centered
+task.wait(0.1) -- small delay
+
+local introTween = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    BackgroundTransparency = 0,
+    Size = UDim2.new(0, 260, 0, 380),
+})
+introTween:Play()
+
+-- part 5 (updateMenuDisplay etc - adjusted SF positions for new heights)
 local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
     PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
@@ -294,7 +330,7 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
     EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
--- part 5
+
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end end
     local ad, te = {}, 0
@@ -303,30 +339,30 @@ _G.updateMenuDisplay = function()
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
-        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
+        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 270)
         local function makeVis(t, s, cb)
-            local v = Instance.new("TextButton", SF) v.Size, v.BackgroundColor3, v.Font, v.Text, v.TextColor3, v.TextSize = UDim2.new(1, 0, 0, 35), s and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, t, Color3.fromRGB(255, 255, 255), 13
+            local v = Instance.new("TextButton", SF) v.Size, v.BackgroundColor3, v.Font, v.Text, v.TextColor3, v.TextSize = UDim2.new(1, 0, 0, 32), s and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, t, Color3.fromRGB(255, 255, 255), 12
             Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5) v.MouseButton1Click:Connect(cb)
         end
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
-        SF.CanvasSize = UDim2.new(0, 0, 0, 130) return
+        SF.CanvasSize = UDim2.new(0, 0, 0, 120) return
     elseif _G.cM == "Granny" then
-        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
+        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 270)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                te = te + 1 local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. p.Name, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
+                te = te + 1 local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 28), Enum.Font.SourceSans, "  " .. p.Name, Color3.fromRGB(255, 255, 255), 13, Enum.TextXAlignment.Left
                 Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4) eB.MouseButton1Click:Connect(function() pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end) end)
             end
         end
-        SF.CanvasSize = UDim2.new(0, 0, 0, te * 38) return
+        SF.CanvasSize = UDim2.new(0, 0, 0, te * 34) return
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
         if _G.cS == "Movement" then SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = false, true, true, false
         else
             SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = true, true, false, true
-            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.49, 0), UDim2.new(0.9, 0, 0, 115)
+            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.55, 0), UDim2.new(0.9, 0, 0, 115)
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
@@ -337,7 +373,7 @@ _G.updateMenuDisplay = function()
                         if currentQuery == "" or string.find(nameLower, currentQuery) then
                             if not ad[customButtonName] and not Players:GetPlayerFromCharacter(current) then
                                 ad[customButtonName] = true te = te + 1
-                                local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
+                                local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 28), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 13, Enum.TextXAlignment.Left
                                 Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
                                 eB.MouseButton1Click:Connect(function() pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = (current:IsA("Model") and (current.PrimaryPart and current.PrimaryPart.CFrame or current:FindFirstChildWhichIsA("BasePart", true).CFrame) or current.CFrame) + Vector3.new(0, 3.5, 0) end) end)
                             end
@@ -346,20 +382,21 @@ _G.updateMenuDisplay = function()
                 end
             end
             if te == 0 and currentQuery ~= "" then
-                local label = Instance.new("TextLabel", SF) label.Size = UDim2.new(1, 0, 0, 30) label.BackgroundTransparency = 1
+                local label = Instance.new("TextLabel", SF) label.Size = UDim2.new(1, 0, 0, 25) label.BackgroundTransparency = 1
                 label.Text = "No items found for '" .. _G.SearchQuery .. "'"
-                label.TextColor3 = Color3.fromRGB(255, 60, 60) label.Font = Enum.Font.SourceSansBold label.TextSize = 12 label.Parent = SF te = 1
+                label.TextColor3 = Color3.fromRGB(255, 60, 60) label.Font = Enum.Font.SourceSansBold label.TextSize = 11 label.Parent = SF te = 1
             end
-            SF.CanvasSize = UDim2.new(0, 0, 0, te * 38)
+            SF.CanvasSize = UDim2.new(0, 0, 0, te * 34)
         end
     end
 end
 
+-- Dragging logic (unchanged)
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
--- part 6
--- SMOOTH INFINITE YIELD FLY - No spasms, smooth rotation, fixed speed (30)
+
+-- Fly loop (smooth, camera-relative, fixed speed)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -370,8 +407,7 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
     
-    -- Store the original root joint C0 for smooth rotation
-    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    local rootPart = hrp
     local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
     local rootJoint = nil
     if torso and rootPart then
@@ -395,7 +431,6 @@ local function startFly()
             return
         end
         
-        -- Refresh character parts (in case of respawn)
         local currentChar = LocalPlayer.Character
         if not currentChar then return end
         local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
@@ -418,16 +453,11 @@ local function startFly()
             currentHrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- SMOOTH ROTATION: Use root joint to rotate torso instead of forcing CFrame
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
-            -- Get the horizontal and vertical angles
             local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
             local verticalAngle = math.asin(math.clamp(lookDir.Y, -1, 1))
-            
-            -- Apply rotation through root joint (smooth, no spasms)
             if rootJoint then
-                -- Create a smooth CFrame rotation
                 local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
                 rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
             end
