@@ -186,26 +186,27 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
+-- ФИКС СЕТКИ: Anti-Kill железно закреплен на 0.26
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.25, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
--- 🛠️ САМ СЕРЧБОКС (Поменяли 0.31 на 0.30 в UDim2.new)
+-- ФИКС СЕТКИ: SearchBox строго на 0.38 (ровно 8 пикселей отступа под Anti-Kill)
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.30, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- 🛠️ КНОПКИ FLY И NOCLIP (Поменяли 0.31 на 0.30 в UDim2.new)
+-- ФИКС СЕТКИ: Кнопки Fly/Noclip строго на 0.38 (идеальное совпадение линий)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
-MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.30, 0), UDim2.new(0.9, 0, 0, 40)
+MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.38, 0), UDim2.new(0.9, 0, 0, 35)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
-FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
+FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
-NoclipBtn.Name, NoclipBtn.Size, NoclipBtn.Position, NoclipBtn.BackgroundColor3, NoclipBtn.Font, NoclipBtn.Text, NoclipBtn.TextColor3, NoclipBtn.TextSize = "NoclipBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0.52, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Noclip: OFF", Color3.fromRGB(255, 255, 255), 13
+NoclipBtn.Name, NoclipBtn.Size, NoclipBtn.Position, NoclipBtn.BackgroundColor3, NoclipBtn.Font, NoclipBtn.Text, NoclipBtn.TextColor3, NoclipBtn.TextSize = "NoclipBtn", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Noclip: OFF", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
 local SF = Instance.new("ScrollingFrame", MainFrame)
@@ -289,9 +290,8 @@ _G.updateMenuDisplay = function()
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
-        MainFrame.Size = UDim2.new(0, 260, 0, 350) -- Возвращаем дефолтный размер
-        RB.Position = UDim2.new(0.05, 0, 0.86, 0) -- Дефолтная позиция кнопки рефреша
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        -- Выставили идеальный зазор ровно в 8 пикселей под кнопками категорий
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
         
         local vG = Instance.new("TextButton", SF)
         vG.Size, vG.BackgroundColor3, vG.Font, vG.Text, vG.TextColor3, vG.TextSize = UDim2.new(1, 0, 0, 35), shared.CheatConfig.PlayersESP and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, shared.CheatConfig.PlayersESP and "ESP Players: ON (RED)" or "ESP Players: OFF", Color3.fromRGB(255, 255, 255), 13
@@ -316,9 +316,7 @@ _G.updateMenuDisplay = function()
     end
     
     if _G.cM == "Granny" then
-        MainFrame.Size = UDim2.new(0, 260, 0, 350)
-        RB.Position = UDim2.new(0.05, 0, 0.86, 0)
-        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
+        SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1 local eB = Instance.new("TextButton", SF)
@@ -330,23 +328,25 @@ _G.updateMenuDisplay = function()
 -- part 5
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
-        
-        -- ПОЛНАЯ СИММЕТРИЯ: Кнопка Anti-Kill ВСЕГДА стоит на одном месте в 0.25
-        MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
-        MainFrame.AntiKillBtn.Visible = true
         MainFrame.Size = UDim2.new(0, 260, 0, 350)
         RB.Position = UDim2.new(0.05, 0, 0.86, 0)
         
+        -- ПОЛНАЯ СИММЕТРИЯ СЕТКИ: Отступы между всеми строками ровно 8 пикселей
+        MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.26, 0)
+        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0.38, 0)
+        
         if _G.cS == "Movement" then
             MainFrame.SearchBox.Visible = false
+            MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = true
             SF.Visible = false
         else
             MainFrame.SearchBox.Visible = true
+            MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = false
             SF.Visible = true
-            -- Сдвинули начало скролл-списка предметов ниже (на 0.48), чтобы SearchBox его не перекрывал
-            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.48, 0), UDim2.new(0.9, 0, 0, 120)
+            -- Выставили отступ начала списка предметов на 0.49, чтобы зазор до SearchBox был ровно 8 пикселей
+            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.49, 0), UDim2.new(0.9, 0, 0, 115)
             
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
