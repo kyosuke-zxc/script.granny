@@ -77,7 +77,7 @@ local function applyPlayersESP(targetFrame, customName)
     
     local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
     local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
-    local displayName = isKiller and "Bot" or customName
+    local displayName = customName
 
     if not targetFrame:FindFirstChild(espName) then
         local hl = Instance.new("Highlight", targetFrame)
@@ -107,7 +107,10 @@ local function applyPlayersESP(targetFrame, customName)
         label.Parent = bgui
         bgui.Parent = targetFrame
     else
-        pcall(function() targetFrame[espName.."Text"].TextLabel.Text = displayName targetFrame[espName.."Text"].TextLabel.TextColor3 = espColor end)
+        pcall(function() 
+            targetFrame[espName.."Text"].TextLabel.Text = displayName 
+            targetFrame[espName.."Text"].TextLabel.TextColor3 = espColor 
+        end)
     end
 end
 
@@ -247,14 +250,13 @@ local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- Movement Controls Frame (Fly & Noclip only, no speed control)
+-- Movement Controls Frame (Fly & Noclip only)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
 MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
 MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 40)
 
--- Fly button (left)
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name = "FlyBtn"
 FlyBtn.Size = UDim2.new(0.48, 0, 1, 0)
@@ -266,7 +268,6 @@ FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FlyBtn.TextSize = 13
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 
--- Noclip button (right)
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
 NoclipBtn.Name = "NoclipBtn"
 NoclipBtn.Size = UDim2.new(0.48, 0, 1, 0)
@@ -358,8 +359,8 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 -- part 6
--- INFINITE YIELD FLY - Camera relative, character tilts up/down, fixed speed (30)
-local flySpeed = 30   -- change this if you want
+-- SMOOTH INFINITE YIELD FLY - No spasms, smooth rotation, fixed speed (30)
+local flySpeed = 30
 local flyConnection = nil
 
 local function startFly()
@@ -368,6 +369,19 @@ local function startFly()
     local hum = char:FindFirstChildOfClass("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
+    
+    -- Store the original root joint C0 for smooth rotation
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+    local rootJoint = nil
+    if torso and rootPart then
+        for _, joint in pairs(torso:GetDescendants()) do
+            if joint:IsA("Motor6D") and joint.Part0 == rootPart and joint.Part1 == torso then
+                rootJoint = joint
+                break
+            end
+        end
+    end
     
     hum.PlatformStand = true
     hum:ChangeState(Enum.HumanoidStateType.Running)
@@ -381,30 +395,42 @@ local function startFly()
             return
         end
         
+        -- Refresh character parts (in case of respawn)
+        local currentChar = LocalPlayer.Character
+        if not currentChar then return end
+        local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
+        local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
+        if not currentHrp or not currentHum then return end
+        
         local cam = Workspace.CurrentCamera
-        local lookVec = cam.CFrame.LookVector  -- full 3D direction (includes up/down)
+        local lookVec = cam.CFrame.LookVector
         local rightVec = cam.CFrame.RightVector
         local vel = Vector3.new()
         
-        -- WASD movement
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + lookVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - lookVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - rightVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + rightVec end
         
         if vel.Magnitude > 0 then
-            hrp.Velocity = vel.Unit * flySpeed
+            currentHrp.Velocity = vel.Unit * flySpeed
         else
-            hrp.Velocity = Vector3.new(0, 0, 0)
+            currentHrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- Rotate character to face exactly where camera looks (including vertical tilt)
+        -- SMOOTH ROTATION: Use root joint to rotate torso instead of forcing CFrame
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
-            -- Use world up to avoid rolling, but tilt forward/backward based on lookDir
-            local upVec = Vector3.new(0, 1, 0)
-            -- CFrame from position and look direction, with up vector clamped to world up
-            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + lookDir, upVec)
+            -- Get the horizontal and vertical angles
+            local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
+            local verticalAngle = math.asin(math.clamp(lookDir.Y, -1, 1))
+            
+            -- Apply rotation through root joint (smooth, no spasms)
+            if rootJoint then
+                -- Create a smooth CFrame rotation
+                local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
+                rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
+            end
         end
     end)
 end
