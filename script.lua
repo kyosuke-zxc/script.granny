@@ -288,8 +288,8 @@ _G.updateMenuDisplay = function()
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
-        -- УЛЬТРА-ФИКС: Телепортируем SearchBox далеко за экран (в -500), чтобы убрать черную полосу
-        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0, -500)
+        MainFrame.Size = UDim2.new(0, 260, 0, 350) -- Возвращаем дефолтный размер
+        RB.Position = UDim2.new(0.05, 0, 0.86, 0) -- Дефолтная позиция кнопки рефреша
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         
         local vG = Instance.new("TextButton", SF)
@@ -315,8 +315,8 @@ _G.updateMenuDisplay = function()
     end
     
     if _G.cM == "Granny" then
-        -- УЛЬТРА-ФИКС: Телепортируем SearchBox далеко за экран (в -500)
-        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0, -500)
+        MainFrame.Size = UDim2.new(0, 260, 0, 350)
+        RB.Position = UDim2.new(0.05, 0, 0.86, 0)
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -329,16 +329,22 @@ _G.updateMenuDisplay = function()
 -- part 5
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
-        
-        -- СТАБИЛЬНЫЕ СТАНДАРТНЫЕ КООРДИНАТЫ (Убрали тест с -500 пикселей)
         MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0.25, 0)
         
         if _G.cS == "Movement" then
+            -- ДИНАМИЧЕСКИЙ РЕФИТ: Сжимаем меню и поднимаем кнопку REFRESH LIST наверх под кнопки полета
+            MainFrame.Size = UDim2.new(0, 260, 0, 240) 
+            RB.Position = UDim2.new(0.05, 0, 0.78, 0) 
+            
             MainFrame.SearchBox.Visible = false
             MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = true
             SF.Visible = false
         else
+            -- Возвращаем стандартный длинный размер для отображения предметов
+            MainFrame.Size = UDim2.new(0, 260, 0, 350)
+            RB.Position = UDim2.new(0.05, 0, 0.86, 0)
+            
             MainFrame.SearchBox.Visible = true
             MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = false
