@@ -8,7 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
-shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false, FlySpeed = 25 }
+shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
 _G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"}
 _G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"}
@@ -247,17 +247,17 @@ local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- Movement Controls Frame (Fly, Noclip, and Speed)
+-- Movement Controls Frame (Fly & Noclip only, no speed control)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
 MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
-MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 80)
+MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 40)
 
--- Fly button (row 1, left)
+-- Fly button (left)
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name = "FlyBtn"
-FlyBtn.Size = UDim2.new(0.48, 0, 0, 35)
+FlyBtn.Size = UDim2.new(0.48, 0, 1, 0)
 FlyBtn.Position = UDim2.new(0, 0, 0, 0)
 FlyBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 FlyBtn.Font = Enum.Font.SourceSansBold
@@ -266,10 +266,10 @@ FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FlyBtn.TextSize = 13
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 
--- Noclip button (row 1, right)
+-- Noclip button (right)
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
 NoclipBtn.Name = "NoclipBtn"
-NoclipBtn.Size = UDim2.new(0.48, 0, 0, 35)
+NoclipBtn.Size = UDim2.new(0.48, 0, 1, 0)
 NoclipBtn.Position = UDim2.new(0.52, 0, 0, 0)
 NoclipBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 NoclipBtn.Font = Enum.Font.SourceSansBold
@@ -277,67 +277,6 @@ NoclipBtn.Text = "Noclip: OFF"
 NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 NoclipBtn.TextSize = 13
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
-
--- Speed control row (row 2)
-local SpeedRow = Instance.new("Frame", MoveControlsFrame)
-SpeedRow.Size = UDim2.new(1, 0, 0, 30)
-SpeedRow.Position = UDim2.new(0, 0, 0, 40)
-SpeedRow.BackgroundTransparency = 1
-
-local SpeedLabel = Instance.new("TextLabel", SpeedRow)
-SpeedLabel.Size = UDim2.new(0.35, 0, 1, 0)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.Text = "Fly Speed:"
-SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedLabel.Font = Enum.Font.SourceSansBold
-SpeedLabel.TextSize = 14
-SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local SpeedBox = Instance.new("TextBox", SpeedRow)
-SpeedBox.Size = UDim2.new(0.25, 0, 1, 0)
-SpeedBox.Position = UDim2.new(0.37, 0, 0, 0)
-SpeedBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedBox.Font = Enum.Font.SourceSans
-SpeedBox.TextSize = 14
-SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
-SpeedBox.ClearTextOnFocus = false
-Instance.new("UICorner", SpeedBox).CornerRadius = UDim.new(0, 5)
-
--- Live speed display
-local SpeedDisplay = Instance.new("TextLabel", SpeedRow)
-SpeedDisplay.Size = UDim2.new(0.25, 0, 1, 0)
-SpeedDisplay.Position = UDim2.new(0.65, 0, 0, 0)
-SpeedDisplay.BackgroundTransparency = 1
-SpeedDisplay.Text = "(" .. (shared.CheatConfig.FlySpeed or 25) .. ")"
-SpeedDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedDisplay.Font = Enum.Font.SourceSans
-SpeedDisplay.TextSize = 13
-SpeedDisplay.TextXAlignment = Enum.TextXAlignment.Left
-
-SpeedBox:GetPropertyChangedSignal("Text"):Connect(function()
-    local val = tonumber(SpeedBox.Text)
-    if val then
-        val = math.clamp(val, 10, 50)
-        shared.CheatConfig.FlySpeed = val
-        SpeedDisplay.Text = "(" .. val .. ")"
-    else
-        SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
-    end
-end)
-
-SpeedBox.FocusLost:Connect(function()
-    local val = tonumber(SpeedBox.Text)
-    if val then
-        val = math.clamp(val, 10, 50)
-        shared.CheatConfig.FlySpeed = val
-        SpeedBox.Text = tostring(val)
-        SpeedDisplay.Text = "(" .. val .. ")"
-    else
-        SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
-        SpeedDisplay.Text = "(" .. (shared.CheatConfig.FlySpeed or 25) .. ")"
-    end
-end)
 
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
@@ -419,7 +358,8 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 -- part 6
--- INFINITE YIELD STYLE FLY - Camera relative + character turns to face camera direction
+-- INFINITE YIELD FLY - Camera relative, character tilts up/down, fixed speed (30)
+local flySpeed = 30   -- change this if you want
 local flyConnection = nil
 
 local function startFly()
@@ -442,28 +382,29 @@ local function startFly()
         end
         
         local cam = Workspace.CurrentCamera
-        local forward = cam.CFrame.LookVector  -- includes vertical
-        local right = cam.CFrame.RightVector
+        local lookVec = cam.CFrame.LookVector  -- full 3D direction (includes up/down)
+        local rightVec = cam.CFrame.RightVector
         local vel = Vector3.new()
         
         -- WASD movement
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + forward end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - forward end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - right end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + lookVec end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - lookVec end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - rightVec end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + rightVec end
         
-        local speed = shared.CheatConfig.FlySpeed or 25
         if vel.Magnitude > 0 then
-            hrp.Velocity = vel.Unit * speed
+            hrp.Velocity = vel.Unit * flySpeed
         else
             hrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- Make character face the camera's horizontal direction
-        local lookDir = cam.CFrame.LookVector
-        local flatDir = Vector3.new(lookDir.X, 0, lookDir.Z)
-        if flatDir.Magnitude > 0 then
-            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + flatDir)
+        -- Rotate character to face exactly where camera looks (including vertical tilt)
+        local lookDir = lookVec
+        if lookDir.Magnitude > 0 then
+            -- Use world up to avoid rolling, but tilt forward/backward based on lookDir
+            local upVec = Vector3.new(0, 1, 0)
+            -- CFrame from position and look direction, with up vector clamped to world up
+            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + lookDir, upVec)
         end
     end)
 end
