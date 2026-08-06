@@ -190,13 +190,15 @@ local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.25, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
+-- ПОДНЯЛИ КНОПКУ АНТИКИЛЛА ВЫШЕ ЧТОБЫ УБРАТЬ ПУСТОТУ (с 0.34 на 0.26)
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.34, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
+-- ПОДНЯЛИ ФРЕЙМ С КНОПКАМИ FLY И NOCLIP СЛЕДОМ (с 0.45 на 0.40)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
-MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.45, 0), UDim2.new(0.9, 0, 0, 40)
+MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.40, 0), UDim2.new(0.9, 0, 0, 40)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 0, 35), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
@@ -224,11 +226,10 @@ SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
     if _G.updateMenuDisplay then _G.updateMenuDisplay() end
 end)
 
--- ИСПРАВЛЕННАЯ СТАБИЛЬНАЯ ФУНКЦИЯ КЛИКОВ (БЕЗ ОПЕЧАТОК)
 local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
     PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
-    VisualsBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
+    VisualsTabBtn.MouseButton1Click:Connect(function() _G.cM = "Visuals" _G.updateMenuDisplay() end)
     ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
     EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
@@ -331,22 +332,22 @@ _G.updateMenuDisplay = function()
         SubNavFrame.Visible = true
         MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0.25, 0)
         
+        -- ЖЕСТКО ФИКСИРУЕМ РАЗМЕР И ПОЗИЦИЮ REFRESH (Как ты просил)
+        MainFrame.Size = UDim2.new(0, 260, 0, 350)
+        RB.Position = UDim2.new(0.05, 0, 0.86, 0)
+        
         if _G.cS == "Movement" then
-            -- ДИНАМИЧЕСКИЙ РЕФИТ: Сжимаем меню и поднимаем кнопку REFRESH LIST наверх под кнопки полета
-            MainFrame.Size = UDim2.new(0, 260, 0, 240) 
-            RB.Position = UDim2.new(0.05, 0, 0.78, 0) 
-            
             MainFrame.SearchBox.Visible = false
             MainFrame.AntiKillBtn.Visible = true
+            -- Меняем координаты Anti-Kill во вкладке Movement, чтобы она встала выше (скрывая серчбокс)
+            MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
             MainFrame.MoveControlsFrame.Visible = true
             SF.Visible = false
         else
-            -- Возвращаем стандартный длинный размер для отображения предметов
-            MainFrame.Size = UDim2.new(0, 260, 0, 350)
-            RB.Position = UDim2.new(0.05, 0, 0.86, 0)
-            
             MainFrame.SearchBox.Visible = true
             MainFrame.AntiKillBtn.Visible = true
+            -- Возвращаем дефолтную позицию Anti-Kill во вкладке ITEMS
+            MainFrame.AntiKillBtn.Position = UDim2.new(0.05, 0, 0.34, 0)
             MainFrame.MoveControlsFrame.Visible = false
             SF.Visible = true
             SF.Position, SF.Size = UDim2.new(0.05, 0, 0.46, 0), UDim2.new(0.9, 0, 0, 125)
