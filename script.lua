@@ -228,7 +228,7 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
 end
 -- part 4
 _G.updateMenuDisplay = function()
-    for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
+    for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end end
     local ad, te = {}, 0
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     GrannyTabBtn.BackgroundColor3, GrannyTabBtn.TextColor3 = (_G.cM == "Granny") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Granny") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
@@ -241,8 +241,20 @@ _G.updateMenuDisplay = function()
             Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5) v.MouseButton1Click:Connect(cb)
         end
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
+        
+        shared.CheatConfig.ItemsESP = shared.CheatConfig.ItemsESP or false
+        makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON (WHITE)" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() 
+            shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP 
+            if not shared.CheatConfig.ItemsESP then
+                for _, obj in pairs(Workspace:GetDescendants()) do
+                    if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
+                end
+            end
+            _G.updateMenuDisplay() 
+        end)
+        
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
-        SF.CanvasSize = UDim2.new(0, 0, 0, 90) return
+        SF.CanvasSize = UDim2.new(0, 0, 0, 130) return
     elseif _G.cM == "Granny" then
         SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
         for _, p in pairs(Players:GetPlayers()) do
@@ -252,6 +264,7 @@ _G.updateMenuDisplay = function()
             end
         end
         SF.CanvasSize = UDim2.new(0, 0, 0, te * 38) return
+-- part 5
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
         if _G.cS == "Movement" then SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = false, true, true, false
@@ -280,6 +293,18 @@ _G.updateMenuDisplay = function()
                                 else for _, kw in pairs(iK) do if string.find(nameLower, kw) then iV = true break end end end
                             end
                         end
+                        
+                        -- ЛОГИКА БЕЛОГО ESP ПРЕДМЕТОВ
+                        if iV and shared.CheatConfig.ItemsESP then
+                            if not current:FindFirstChild("UniversalWhiteItemESP") then
+                                local hl = Instance.new("Highlight", current)
+                                hl.Name = "UniversalWhiteItemESP"
+                                hl.FillColor = Color3.fromRGB(255, 255, 255)
+                                hl.FillTransparency = 0.4
+                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            end
+                        end
+                        
                         if currentQuery ~= "" and not string.find(nameLower, currentQuery) then iV = false end
                         if iV and not ad[customButtonName] and not Players:GetPlayerFromCharacter(current) then
                             ad[customButtonName] = true te = te + 1
@@ -289,6 +314,12 @@ _G.updateMenuDisplay = function()
                         end
                     end
                 end
+            end
+            if te == 0 and currentQuery ~= "" then
+                local label = Instance.new("TextLabel", SF) label.Size = UDim2.new(1, 0, 0, 30) label.BackgroundTransparency = 1
+                label.Text = "No items found for '" .. _G.SearchQuery .. "'"
+                label.TextColor3 = Color3.fromRGB(255, 60, 60) label.Font = Enum.Font.SourceSansBold label.TextSize = 12
+                te = 1
             end
             SF.CanvasSize = UDim2.new(0, 0, 0, te * 38)
         end
