@@ -98,76 +98,114 @@ task.spawn(function()
     end
 end)
 -- part 2
+local function applyPlayersESP(targetFrame, customName)
+    if not targetFrame or not targetFrame.Parent then return end
+    local espName = "UniversalWhiteESP"
+    if not shared.CheatConfig.PlayersESP then
+        if targetFrame:FindFirstChild(espName) then targetFrame[espName]:Destroy() end
+        if targetFrame:FindFirstChild(espName.."Text") then targetFrame[espName.."Text"]:Destroy() end
+        return
+    end
+    
+    -- УМНЫЙ ДЕТЕКТ МАНЬЯКА ИЗ НОВОГО СКРИПТА
+    local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny")
+    local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(255, 255, 255)
+    local displayName = isKiller and (customName .. " [KILLER]") or customName
+
+    if not targetFrame:FindFirstChild(espName) then
+        local hl = Instance.new("Highlight", targetFrame)
+        hl.Name = espName
+        hl.FillColor = espColor
+        hl.FillTransparency = 0.5
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+    else
+        pcall(function() targetFrame[espName].FillColor = espColor end)
+    end
+    
+    if not targetFrame:FindFirstChild(espName.."Text") then
+        local bgui = Instance.new("BillboardGui", targetFrame)
+        bgui.Name = espName.."Text"
+        bgui.Size = UDim2.new(0, 160, 0, 30)
+        bgui.AlwaysOnTop = true
+        bgui.StudsOffset = Vector3.new(0, 3.5, 0)
+        local label = Instance.new("TextLabel", bgui)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = displayName
+        label.TextColor3 = espColor
+        label.TextStrokeTransparency = 0
+        label.Font = Enum.Font.SourceSansBold
+        label.TextSize = 13
+    else
+        pcall(function() targetFrame[espName.."Text"].TextLabel.Text = displayName targetFrame[espName.."Text"].TextLabel.TextColor3 = espColor end)
+    end
+end
+
+local function watchPlayer(p)
+    p.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        if shared.CheatConfig.PlayersESP then applyPlayersESP(char, p.DisplayName or p.Name) end
+    end)
+end
+for _, p in pairs(Players:GetPlayers()) do watchPlayer(p) end
+Players.PlayerAdded:Connect(watchPlayer)
+
+-- ПОСТОЯННЫЙ ДИНАМИЧЕСКИЙ ЦИКЛ ОБНОВЛЕНИЯ ИГРОКОВ И ПРЕДМЕТОВ (БЕЗ ЛАГОВ)
 task.spawn(function()
-    while task.wait(0.1) do
-        if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            pcall(function()
-                local myRoot = LocalPlayer.Character.HumanoidRootPart
-                local needToTeleport = false
-                local trapsFolder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Traps")
-                if trapsFolder then
-                    for _, trap in pairs(trapsFolder:GetChildren()) do
-                        if trap:IsA("Model") or trap:IsA("BasePart") then
-                            local trapPart = trap:IsA("Model") and trap:FindFirstChildWhichIsA("BasePart", true) or trap
-                            if trapPart and (myRoot.Position - trapPart.Position).Magnitude < 8 then needToTeleport = true break end
+    while task.wait(1) do
+        pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+                    -- 1. Рендерим игроков и ботов
+                    if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+                        if shared.CheatConfig.PlayersESP then
+                            local player = Players:GetPlayerFromCharacter(obj)
+                            applyPlayersESP(obj, player and (player.DisplayName or player.Name) or "Bot")
+                        else
+                            if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
+                            if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
+                        end
+                    end
+                    
+                    -- 2. ИНТЕГРИРОВАННЫЙ БЕЛОЙ TEXT-ESP НА ПРЕДМЕТЫ С САЙТА
+                    if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
+                        if shared.CheatConfig.ItemsESP then
+                            local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
+                            if targetPart then
+                                if not obj:FindFirstChild("UniversalWhiteItemESP") then
+                                    local hl = Instance.new("Highlight", obj)
+                                    hl.Name = "UniversalWhiteItemESP"
+                                    hl.FillColor = Color3.fromRGB(255, 255, 255)
+                                    hl.FillTransparency = 0.5
+                                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    
+                                    local bgui = Instance.new("BillboardGui", targetPart)
+                                    bgui.Name = "UniversalWhiteItemESPText"
+                                    bgui.Size = UDim2.new(0, 120, 0, 25)
+                                    bgui.StudsOffset = Vector3.new(0, 2, 0)
+                                    bgui.AlwaysOnTop = true
+                                    local label = Instance.new("TextLabel", bgui)
+                                    label.Size = UDim2.new(1, 0, 1, 0)
+                                    label.BackgroundTransparency = 1
+                                    label.Text = obj.Name
+                                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                                    label.TextStrokeTransparency = 0
+                                    label.Font = Enum.Font.SourceSansBold
+                                    label.TextSize = 11
+                                end
+                            end
+                        else
+                            if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
+                            if obj:FindFirstChildWhichIsA("BasePart", true) and obj:FindFirstChildWhichIsA("BasePart", true):FindFirstChild("UniversalWhiteItemESPText") then
+                                obj:FindFirstChildWhichIsA("BasePart", true)["UniversalWhiteItemESPText"]:Destroy()
+                            end
                         end
                     end
                 end
-                if not needToTeleport then
-                    for _, obj in pairs(Workspace:GetDescendants()) do
-                        if obj:IsA("Model") and obj ~= LocalPlayer.Character and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChildOfClass("Humanoid") then
-                            if not Players:GetPlayerFromCharacter(obj) and (myRoot.Position - obj.HumanoidRootPart.Position).Magnitude < 15 then needToTeleport = true break end
-                        end
-                    end
-                end
-                if needToTeleport then
-                    local targetAlly = getRandomAlly()
-                    if targetAlly then myRoot.CFrame = targetAlly.CFrame + Vector3.new(0, 3, 0) 
-                    else 
-                        local spawnLoc = Workspace:FindFirstChildWhichIsA("SpawnLocation", true)
-                        myRoot.CFrame = spawnLoc and (spawnLoc.CFrame + Vector3.new(0, 3, 0)) or (myRoot.CFrame * CFrame.new(math.random(1) == 1 and 60 or -60, 0, math.random(1) == 1 and 60 or -60))
-                    end
-                    task.wait(0.5)
-                end
-            end)
-        end
+            end
+        end)
     end
 end)
-
-RunService.Stepped:Connect(function()
-    if shared.CheatConfig.Noclip and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
-    end
-end)
-
-local flySpeed = 22
-RunService.RenderStepped:Connect(function()
-    if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        local root, hum, cam = LocalPlayer.Character.HumanoidRootPart, LocalPlayer.Character:FindFirstChildOfClass("Humanoid"), Workspace.CurrentCamera
-        hum.PlatformStand = false
-        root.Velocity = Vector3.new(0, 0, 0)
-        local camLook = cam.CFrame.LookVector
-        root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camLook.X, 0, camLook.Z))
-        local moveDir = hum.MoveDirection
-        if moveDir.Magnitude > 0 then
-            local camCFrame = cam.CFrame
-            local look, right = camCFrame.LookVector, camCFrame.RightVector
-            local finalVelocity = Vector3.new(0,0,0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then finalVelocity = finalVelocity + look end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then finalVelocity = finalVelocity - look end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then finalVelocity = finalVelocity - right end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then finalVelocity = finalVelocity + right end
-            if finalVelocity.Magnitude == 0 then finalVelocity = (camCFrame * CFrame.new(moveDir)).Position - camCFrame.Position end
-            root.Velocity = finalVelocity.Unit * flySpeed
-        end
-    end
-end)
-
-local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 -- part 3
 local function createTab(name, text, posX)
     local btn = Instance.new("TextButton", MainFrame)
@@ -243,13 +281,8 @@ _G.updateMenuDisplay = function()
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
         
         shared.CheatConfig.ItemsESP = shared.CheatConfig.ItemsESP or false
-        makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON (WHITE)" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() 
+        makeVis(shared.CheatConfig.ItemsESP and "ESP Items + Text: ON" or "ESP Items + Text: OFF", shared.CheatConfig.ItemsESP, function() 
             shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP 
-            if not shared.CheatConfig.ItemsESP then
-                for _, obj in pairs(Workspace:GetDescendants()) do
-                    if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
-                end
-            end
             _G.updateMenuDisplay() 
         end)
         
