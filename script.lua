@@ -280,7 +280,6 @@ _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
     local ad, te = {}, 0
     
-    -- ГАРАНТИРУЕМ ЧТО ВЕРХНИЕ ВКЛАДКИ ВСЕГДА ОСТАЮТСЯ НА ЭКРАНЕ И НЕ ИСЧЕЗАЮТ
     PlayerTabBtn.Visible, GrannyTabBtn.Visible, VisualsTabBtn.Visible = true, true, true
     
     PlayerTabBtn.BackgroundColor3, PlayerTabBtn.TextColor3 = (_G.cM == "Player") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Player") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
@@ -288,6 +287,8 @@ _G.updateMenuDisplay = function()
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
+        -- УЛЬТРА-ФИКС: Телепортируем SearchBox далеко за экран (в -500), чтобы убрать черную полосу
+        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0, -500)
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         
         local vG = Instance.new("TextButton", SF)
@@ -313,6 +314,8 @@ _G.updateMenuDisplay = function()
     end
     
     if _G.cM == "Granny" then
+        -- УЛЬТРА-ФИКС: Телепортируем SearchBox далеко за экран (в -500)
+        MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0, -500)
         SubNavFrame.Visible, MainFrame.SearchBox.Visible, MainFrame.AntiKillBtn.Visible, MainFrame.MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.16, 0), UDim2.new(0.9, 0, 0, 225)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -326,13 +329,16 @@ _G.updateMenuDisplay = function()
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
         
-        -- ЖЁСТКИЙ ФИКС СТРОКИ ПОИСКА: Скрываем её полностью без чёрных полосок
         if _G.cS == "Movement" then
+            -- УЛЬТРА-ФИКС: Выкидываем SearchBox за экран, убирая наслоение на кнопку Anti-Kill
+            MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0, -500)
             MainFrame.SearchBox.Visible = false
             MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = true
             SF.Visible = false
         else
+            -- Возвращаем на стандартное место во вкладке ITEMS
+            MainFrame.SearchBox.Position = UDim2.new(0.05, 0, 0.25, 0)
             MainFrame.SearchBox.Visible = true
             MainFrame.AntiKillBtn.Visible = true
             MainFrame.MoveControlsFrame.Visible = false
