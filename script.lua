@@ -10,20 +10,20 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- ГЛОБАЛЬНЫЙ СЛОВАРЬ ДЛЯ ИДЕНТИФИКАЦИИ ПРЕДМЕТОВ
 _G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"}
-_G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle"}
+-- ЖЕСТКИЙ БЛЕКЛИСТ ДЛЯ ИСКЛЮЧЕНИЯ ГИГАНТСКИХ ШКАФОВ
+_G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"}
 
--- ФИКС: Объявляем функцию проверки предметов в самом начале, чтобы part 2 её видела!
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
     local nameLower = string.lower(obj.Name)
+    local pNameLower = obj.Parent and string.lower(obj.Parent.Name) or ""
     
-    -- Блокируем колеса и мусор
     if string.find(nameLower, "wheel") then return false end
-    for _, junk in pairs(_G.sJ_Global) do if string.find(nameLower, junk) then return false end end
+    for _, junk in pairs(_G.sJ_Global) do 
+        if string.find(nameLower, junk) or string.find(pNameLower, junk) then return false end 
+    end
     
-    -- Проверяем исключения побегов
     local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter")
     if string.find(nameLower, "battery") or string.find(nameLower, "spark") then return true end
     
@@ -34,12 +34,15 @@ _G.isObjectAnItem = function(obj)
     return false
 end
 
--- ЖЕСТКИЙ ЦИКЛ ДЛЯ 3RD PERSON
+-- НАМЕРТВО ФИКСИРУЕМ ОБХОД КАМЕРЫ ТРЕТЬЕГО ЛИЦА ЧЕРЕЗ FOV И ЗУМ
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        LocalPlayer.CameraMaxZoomDistance = 150
-        if LocalPlayer.CameraMinZoomDistance < 5 then LocalPlayer.CameraMinZoomDistance = 5 end
+        LocalPlayer.CameraMaxZoomDistance = 35
+        LocalPlayer.CameraMinZoomDistance = 10
+        if Workspace.CurrentCamera then
+            Workspace.CurrentCamera.FieldOfView = 85
+        end
     end
 end)
 
@@ -74,8 +77,9 @@ local function applyPlayersESP(targetFrame, customName)
         return
     end
     
-    local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy")
-    local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(255, 255, 255)
+    local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
+    -- ФИКС ЦВЕТОВ: Зелёный выжившим, Красный ботам
+    local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
     local displayName = isKiller and "Bot" or customName
 
     if not targetFrame:FindFirstChild(espName) then
@@ -84,6 +88,7 @@ local function applyPlayersESP(targetFrame, customName)
         hl.FillColor = espColor
         hl.FillTransparency = 0.5
         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     else
         pcall(function() targetFrame[espName].FillColor = espColor end)
     end
@@ -102,6 +107,8 @@ local function applyPlayersESP(targetFrame, customName)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.SourceSansBold
         label.TextSize = 13
+        label.Parent = bgui
+        bgui.Parent = targetFrame
     else
         pcall(function() targetFrame[espName.."Text"].TextLabel.Text = displayName targetFrame[espName.."Text"].TextLabel.TextColor3 = espColor end)
     end
@@ -131,7 +138,7 @@ task.spawn(function()
                         end
                     end
                     
-                    -- БЕЛОЕ TEXT-ESP НА ПРЕДМЕТЫ СКВОЗЬ СТЕНЫ
+                    -- БЕЛОЕ ESP ПРЕДМЕТОВ С ФИЛЬТРАЦИЕЙ ШКАФОВ
                     if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
@@ -142,6 +149,7 @@ task.spawn(function()
                                     hl.FillColor = Color3.fromRGB(255, 255, 255)
                                     hl.FillTransparency = 0.5
                                     hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                                     
                                     local bgui = Instance.new("BillboardGui", targetPart)
                                     bgui.Name = "UniversalWhiteItemESPText"
@@ -156,12 +164,15 @@ task.spawn(function()
                                     label.TextStrokeTransparency = 0
                                     label.Font = Enum.Font.SourceSansBold
                                     label.TextSize = 11
+                                    label.Parent = bgui
+                                    bgui.Parent = targetPart
                                 end
                             end
                         else
                             if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
-                            if obj:FindFirstChildWhichIsA("BasePart", true) and obj:FindFirstChildWhichIsA("BasePart", true):FindFirstChild("UniversalWhiteItemESPText") then
-                                obj:FindFirstChildWhichIsA("BasePart", true)["UniversalWhiteItemESPText"]:Destroy()
+                            local foundPart = obj:FindFirstChildWhichIsA("BasePart", true)
+                            if foundPart and foundPart:FindFirstChild("UniversalWhiteItemESPText") then
+                                foundPart["UniversalWhiteItemESPText"]:Destroy()
                             end
                         end
                     end
@@ -203,35 +214,6 @@ task.spawn(function()
                     task.wait(0.5)
                 end
             end)
-        end
-    end
-end)
-
-RunService.Stepped:Connect(function()
-    if shared.CheatConfig.Noclip and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
-    end
-end)
-
-local flySpeed = 22
-RunService.RenderStepped:Connect(function()
-    if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        local root, hum, cam = LocalPlayer.Character.HumanoidRootPart, LocalPlayer.Character:FindFirstChildOfClass("Humanoid"), Workspace.CurrentCamera
-        hum.PlatformStand = false
-        root.Velocity = Vector3.new(0, 0, 0)
-        local camLook = cam.CFrame.LookVector
-        root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camLook.X, 0, camLook.Z))
-        local moveDir = hum.MoveDirection
-        if moveDir.Magnitude > 0 then
-            local camCFrame = cam.CFrame
-            local look, right = camCFrame.LookVector, camCFrame.RightVector
-            local finalVelocity = Vector3.new(0,0,0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then finalVelocity = finalVelocity + look end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then finalVelocity = finalVelocity - look end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then finalVelocity = finalVelocity - right end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then finalVelocity = finalVelocity + right end
-            if finalVelocity.Magnitude == 0 then finalVelocity = (camCFrame * CFrame.new(moveDir)).Position - camCFrame.Position end
-            root.Velocity = finalVelocity.Unit * flySpeed
         end
     end
 end)
@@ -286,7 +268,6 @@ local RB = Instance.new("TextButton", MainFrame)
 RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
-_G.cM, _G.cS, _G.SearchQuery = "Player", "Items", ""
 local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
     PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
@@ -309,10 +290,7 @@ _G.updateMenuDisplay = function()
             Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5) v.MouseButton1Click:Connect(cb)
         end
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
-        
-        -- УБРАЛИ + ТЕХТ, ТЕПЕРЬ СТРОГО И ЧИСТО "ESP Items"
         makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP _G.updateMenuDisplay() end)
-        
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
         SF.CanvasSize = UDim2.new(0, 0, 0, 130) return
     elseif _G.cM == "Granny" then
@@ -359,7 +337,53 @@ _G.updateMenuDisplay = function()
 end
 
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
-MainFrame.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
+UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+-- part 6
+local flySpeed = 22
+RunService.RenderStepped:Connect(function()
+    if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        local root = LocalPlayer.Character.HumanoidRootPart
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        local cam = Workspace.CurrentCamera
+        
+        hum.PlatformStand = true 
+        hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) 
+        root.Velocity = Vector3.new(0, 0, 0)
+        
+        local camLook = cam.CFrame.LookVector
+        root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camLook.X, 0, camLook.Z))
+        
+        local moveDir = hum.MoveDirection
+        if moveDir.Magnitude > 0 then
+            local camCFrame = cam.CFrame
+            local lookVector = camCFrame.LookVector
+            local rightVector = camCFrame.RightVector
+            local finalVelocity = Vector3.new(0,0,0)
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then finalVelocity = finalVelocity + lookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then finalVelocity = finalVelocity - lookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then finalVelocity = finalVelocity - rightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then finalVelocity = finalVelocity + rightVector end
+            
+            if finalVelocity.Magnitude == 0 then
+                finalVelocity = (camCFrame * CFrame.new(moveDir)).Position - camCFrame.Position
+            end
+            root.Velocity = finalVelocity.Unit * flySpeed
+        else
+            root.Velocity = Vector3.new(0, 0.05, 0) 
+        end
+    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and not shared.CheatConfig.Fly then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").PlatformStand = false
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if shared.CheatConfig.Noclip and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
+    end
+end)
+
 SearchBox:GetPropertyChangedSignal("Text"):Connect(function() _G.SearchQuery = SearchBox.Text _G.updateMenuDisplay() end)
 setupTabClicks(PlayerTabBtn, GrannyTabBtn, VisualsTabBtn, ItemsSubBtn, EscapesSubBtn)
 FlyBtn.MouseButton1Click:Connect(function() shared.CheatConfig.Fly = not shared.CheatConfig.Fly FlyBtn.BackgroundColor3 = shared.CheatConfig.Fly and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) FlyBtn.Text = shared.CheatConfig.Fly and "Fly: ON" or "Fly: OFF" end)
