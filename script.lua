@@ -11,7 +11,6 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false, FlySpeed = 25 }
 
 _G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"}
--- ЖЕСТКИЙ БЛЕКЛИСТ ДЛЯ ИСКЛЮЧЕНИЯ ГИГАНТСКИХ ШКАФОВ
 _G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"}
 
 _G.isObjectAnItem = function(obj)
@@ -34,7 +33,6 @@ _G.isObjectAnItem = function(obj)
     return false
 end
 
--- НАМЕРТВО ФИКСИРУЕМ ОБХОД КАМЕРЫ ТРЕТЬЕГО ЛИЦА ЧЕРЕЗ FOV И ЗУМ
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
@@ -78,7 +76,6 @@ local function applyPlayersESP(targetFrame, customName)
     end
     
     local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
-    -- ФИКС ЦВЕТОВ: Зелёный выжившим, Красный ботам
     local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
     local displayName = isKiller and "Bot" or customName
 
@@ -138,7 +135,6 @@ task.spawn(function()
                         end
                     end
                     
-                    -- БЕЛОЕ ESP ПРЕДМЕТОВ С ФИЛЬТРАЦИЕЙ ШКАФОВ
                     if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
@@ -256,7 +252,7 @@ local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
 MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
-MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 80)   -- taller to fit speed row
+MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 80)
 
 -- Fly button (row 1, left)
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
@@ -285,11 +281,11 @@ Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 -- Speed control row (row 2)
 local SpeedRow = Instance.new("Frame", MoveControlsFrame)
 SpeedRow.Size = UDim2.new(1, 0, 0, 30)
-SpeedRow.Position = UDim2.new(0, 0, 0, 40)   -- below the two buttons
+SpeedRow.Position = UDim2.new(0, 0, 0, 40)
 SpeedRow.BackgroundTransparency = 1
 
 local SpeedLabel = Instance.new("TextLabel", SpeedRow)
-SpeedLabel.Size = UDim2.new(0.4, 0, 1, 0)
+SpeedLabel.Size = UDim2.new(0.35, 0, 1, 0)
 SpeedLabel.BackgroundTransparency = 1
 SpeedLabel.Text = "Fly Speed:"
 SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -298,8 +294,8 @@ SpeedLabel.TextSize = 14
 SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local SpeedBox = Instance.new("TextBox", SpeedRow)
-SpeedBox.Size = UDim2.new(0.3, 0, 1, 0)
-SpeedBox.Position = UDim2.new(0.45, 0, 0, 0)
+SpeedBox.Size = UDim2.new(0.25, 0, 1, 0)
+SpeedBox.Position = UDim2.new(0.37, 0, 0, 0)
 SpeedBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedBox.Font = Enum.Font.SourceSans
@@ -308,15 +304,38 @@ SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
 SpeedBox.ClearTextOnFocus = false
 Instance.new("UICorner", SpeedBox).CornerRadius = UDim.new(0, 5)
 
--- Update speed when user types a new value
-SpeedBox.FocusLost:Connect(function(enterPressed)
+-- Live speed display
+local SpeedDisplay = Instance.new("TextLabel", SpeedRow)
+SpeedDisplay.Size = UDim2.new(0.25, 0, 1, 0)
+SpeedDisplay.Position = UDim2.new(0.65, 0, 0, 0)
+SpeedDisplay.BackgroundTransparency = 1
+SpeedDisplay.Text = "(" .. (shared.CheatConfig.FlySpeed or 25) .. ")"
+SpeedDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedDisplay.Font = Enum.Font.SourceSans
+SpeedDisplay.TextSize = 13
+SpeedDisplay.TextXAlignment = Enum.TextXAlignment.Left
+
+SpeedBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local val = tonumber(SpeedBox.Text)
+    if val then
+        val = math.clamp(val, 10, 50)
+        shared.CheatConfig.FlySpeed = val
+        SpeedDisplay.Text = "(" .. val .. ")"
+    else
+        SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
+    end
+end)
+
+SpeedBox.FocusLost:Connect(function()
     local val = tonumber(SpeedBox.Text)
     if val then
         val = math.clamp(val, 10, 50)
         shared.CheatConfig.FlySpeed = val
         SpeedBox.Text = tostring(val)
+        SpeedDisplay.Text = "(" .. val .. ")"
     else
         SpeedBox.Text = tostring(shared.CheatConfig.FlySpeed or 25)
+        SpeedDisplay.Text = "(" .. (shared.CheatConfig.FlySpeed or 25) .. ")"
     end
 end)
 
@@ -400,44 +419,86 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 -- part 6
--- Fly loop – camera‑relative, no ragdoll, speed from GUI
-RunService.RenderStepped:Connect(function()
-    if not shared.CheatConfig.Fly then
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+-- INFINITE YIELD STYLE FLY - Camera relative + character turns to face camera direction
+local flyConnection = nil
+
+local function startFly()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+    
+    hum.PlatformStand = true
+    hum:ChangeState(Enum.HumanoidStateType.Running)
+    Workspace.Gravity = 0
+    
+    if flyConnection then flyConnection:Disconnect() end
+    flyConnection = RunService.RenderStepped:Connect(function()
+        if not shared.CheatConfig.Fly then
+            flyConnection:Disconnect()
+            flyConnection = nil
+            return
+        end
+        
+        local cam = Workspace.CurrentCamera
+        local forward = cam.CFrame.LookVector  -- includes vertical
+        local right = cam.CFrame.RightVector
+        local vel = Vector3.new()
+        
+        -- WASD movement
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + right end
+        
+        local speed = shared.CheatConfig.FlySpeed or 25
+        if vel.Magnitude > 0 then
+            hrp.Velocity = vel.Unit * speed
+        else
+            hrp.Velocity = Vector3.new(0, 0, 0)
+        end
+        
+        -- Make character face the camera's horizontal direction
+        local lookDir = cam.CFrame.LookVector
+        local flatDir = Vector3.new(lookDir.X, 0, lookDir.Z)
+        if flatDir.Magnitude > 0 then
+            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + flatDir)
+        end
+    end)
+end
+
+local function stopFly()
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
             hum.PlatformStand = false
             Workspace.Gravity = 196.2
         end
-        return
     end
+end
 
-    local char = LocalPlayer.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not root or not hum then return end
-
-    Workspace.Gravity = 0
-    hum.PlatformStand = true
-    hum:ChangeState(Enum.HumanoidStateType.Running)
-
-    local cam = Workspace.CurrentCamera
-    local lookVec = cam.CFrame.LookVector
-    local rightVec = cam.CFrame.RightVector
-
-    local moveDir = Vector3.new(0, 0, 0)
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + lookVec end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - lookVec end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - rightVec end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + rightVec end
-
-    local speed = shared.CheatConfig.FlySpeed or 25
-    if moveDir.Magnitude > 0 then
-        root.Velocity = moveDir.Unit * speed
+local function toggleFly()
+    if shared.CheatConfig.Fly then
+        startFly()
     else
-        root.Velocity = Vector3.new(0, 0, 0)
+        stopFly()
     end
-end)
+end
+
+setmetatable(shared.CheatConfig, {
+    __newindex = function(t, k, v)
+        rawset(t, k, v)
+        if k == "Fly" then
+            if v then startFly() else stopFly() end
+        end
+    end
+})
 
 RunService.Stepped:Connect(function()
     if shared.CheatConfig.Noclip and LocalPlayer.Character then
@@ -447,7 +508,19 @@ end)
 
 SearchBox:GetPropertyChangedSignal("Text"):Connect(function() _G.SearchQuery = SearchBox.Text _G.updateMenuDisplay() end)
 setupTabClicks(PlayerTabBtn, GrannyTabBtn, VisualsTabBtn, ItemsSubBtn, EscapesSubBtn)
-FlyBtn.MouseButton1Click:Connect(function() shared.CheatConfig.Fly = not shared.CheatConfig.Fly FlyBtn.BackgroundColor3 = shared.CheatConfig.Fly and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) FlyBtn.Text = shared.CheatConfig.Fly and "Fly: ON" or "Fly: OFF" end)
-NoclipBtn.MouseButton1Click:Connect(function() shared.CheatConfig.Noclip = not shared.CheatConfig.Noclip NoclipBtn.BackgroundColor3 = shared.CheatConfig.Noclip and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) NoclipBtn.Text = shared.CheatConfig.Noclip and "Noclip: ON" or "Noclip: OFF" end)
+
+FlyBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Fly = not shared.CheatConfig.Fly
+    FlyBtn.BackgroundColor3 = shared.CheatConfig.Fly and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    FlyBtn.Text = shared.CheatConfig.Fly and "Fly: ON" or "Fly: OFF"
+    toggleFly()
+end)
+
+NoclipBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Noclip = not shared.CheatConfig.Noclip
+    NoclipBtn.BackgroundColor3 = shared.CheatConfig.Noclip and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    NoclipBtn.Text = shared.CheatConfig.Noclip and "Noclip: ON" or "Noclip: OFF"
+end)
+
 RB.MouseButton1Click:Connect(_G.updateMenuDisplay)
 _G.updateMenuDisplay()
