@@ -5,7 +5,7 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")  -- for intro animation
+local TweenService = game:GetService("TweenService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
@@ -218,66 +218,74 @@ task.spawn(function()
     end
 end)
 
+-- ========== UI CREATION (Centered + Intro + Kyo Hub) ==========
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-MainFrame.Size = UDim2.new(0, 260, 0, 380)   -- slightly taller for title
+MainFrame.Size = UDim2.new(0, 300, 0, 420)          -- slightly bigger for title
 MainFrame.Active = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+MainFrame.BackgroundTransparency = 1                -- start invisible
+MainFrame.Size = UDim2.new(0, 0, 0, 0)              -- start scaled down
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -210) -- center based on final size
 
--- Center the GUI initially (will be animated)
-MainFrame.Position = UDim2.new(0.5, -130, 0.5, -190)  -- center based on size
-MainFrame.BackgroundTransparency = 1   -- start invisible for intro
-MainFrame.Size = UDim2.new(0, 0, 0, 0) -- start scaled down
-
--- Title: "Kyo Hub"
+-- Title: "Kyo Hub" (top-left corner)
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Position = UDim2.new(0, 0, 0, 5)
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Kyo Hub"
 Title.TextColor3 = Color3.fromRGB(255, 80, 80)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 22
-Title.TextScaled = false
-Title.TextXAlignment = Enum.TextXAlignment.Center
+Title.TextSize = 24
+Title.TextXAlignment = Enum.TextXAlignment.Left      -- left aligned
+Title.TextYAlignment = Enum.TextYAlignment.Center
+Title.TextStrokeTransparency = 0.5
 
--- Part 4 (tabs and controls, adjusted Y offsets to fit title)
+-- Intro Animation: fade in + scale up
+local introTween = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    BackgroundTransparency = 0,
+    Size = UDim2.new(0, 300, 0, 420),
+})
+introTween:Play()
+
+-- Part 4 (tabs and controls, adjusted for title)
 local function createTab(name, text, posX)
     local btn = Instance.new("TextButton", MainFrame)
-    btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.12, 0), UDim2.new(0.29, 0, 0, 30), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
+    btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.13, 0), UDim2.new(0.29, 0, 0, 30), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5) return btn
 end
-local PlayerTabBtn = createTab("PlayerTabBtn", "PLAYER", 0.04)
-local GrannyTabBtn = createTab("GrannyTabBtn", "GRANNY", 0.35)
-local VisualsTabBtn = createTab("VisualsTabBtn", "VISUALS", 0.66)
+local PlayerTabBtn = createTab("PlayerTabBtn", "PLAYER", 0.035)
+local GrannyTabBtn = createTab("GrannyTabBtn", "GRANNY", 0.355)
+local VisualsTabBtn = createTab("VisualsTabBtn", "VISUALS", 0.675)
 
 local SubNavFrame = Instance.new("Frame", MainFrame)
-SubNavFrame.Name, SubNavFrame.BackgroundTransparency, SubNavFrame.Position, SubNavFrame.Size = "SubNavFrame", 1, UDim2.new(0.05, 0, 0.24, 0), UDim2.new(0.9, 0, 0, 25)
+SubNavFrame.Name, SubNavFrame.BackgroundTransparency, SubNavFrame.Position, SubNavFrame.Size = "SubNavFrame", 1, UDim2.new(0.05, 0, 0.25, 0), UDim2.new(0.9, 0, 0, 25)
+
 local ItemsSubBtn = Instance.new("TextButton", SubNavFrame)
 ItemsSubBtn.Size, ItemsSubBtn.BackgroundColor3, ItemsSubBtn.Font, ItemsSubBtn.Text, ItemsSubBtn.TextColor3, ItemsSubBtn.TextSize = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, "ITEMS", Color3.fromRGB(255, 60, 60), 11
 Instance.new("UICorner", ItemsSubBtn).CornerRadius = UDim.new(0, 5)
+
 local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 11
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.34, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.35, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 22), UDim2.new(0.05, 0, 0.46, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 11, Enum.Font.SourceSans, "Type item name...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 22), UDim2.new(0.05, 0, 0.47, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 11, Enum.Font.SourceSans, "Type item name...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
 -- Movement Controls Frame
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
-MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.46, 0)
+MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.47, 0)
 MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 35)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
@@ -304,25 +312,15 @@ Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
+
 local LY = Instance.new("UIListLayout", SF)
 LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
+
 local RB = Instance.new("TextButton", MainFrame)
 RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.88, 0), UDim2.new(0.9, 0, 0, 30), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
--- Intro Animation: fade in + scale up
-MainFrame.BackgroundTransparency = 1
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -130, 0.5, -190) -- keep centered
-task.wait(0.1) -- small delay
-
-local introTween = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    BackgroundTransparency = 0,
-    Size = UDim2.new(0, 260, 0, 380),
-})
-introTween:Play()
-
--- part 5 (updateMenuDisplay etc - adjusted SF positions for new heights)
+-- part 5 (updateMenuDisplay)
 local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
     PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
     GrannyBtn.MouseButton1Click:Connect(function() _G.cM = "Granny" _G.updateMenuDisplay() end)
@@ -339,7 +337,7 @@ _G.updateMenuDisplay = function()
     VisualsTabBtn.BackgroundColor3, VisualsTabBtn.TextColor3 = (_G.cM == "Visuals") and Color3.fromRGB(45, 45, 50) or Color3.fromRGB(35, 35, 40), (_G.cM == "Visuals") and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
     
     if _G.cM == "Visuals" then
-        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 270)
+        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 300)
         local function makeVis(t, s, cb)
             local v = Instance.new("TextButton", SF) v.Size, v.BackgroundColor3, v.Font, v.Text, v.TextColor3, v.TextSize = UDim2.new(1, 0, 0, 32), s and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(45, 45, 50), Enum.Font.SourceSansBold, t, Color3.fromRGB(255, 255, 255), 12
             Instance.new("UICorner", v).CornerRadius = UDim.new(0, 5) v.MouseButton1Click:Connect(cb)
@@ -349,7 +347,7 @@ _G.updateMenuDisplay = function()
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
         SF.CanvasSize = UDim2.new(0, 0, 0, 120) return
     elseif _G.cM == "Granny" then
-        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 270)
+        SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.12, 0), UDim2.new(0.9, 0, 0, 300)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 te = te + 1 local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 28), Enum.Font.SourceSans, "  " .. p.Name, Color3.fromRGB(255, 255, 255), 13, Enum.TextXAlignment.Left
@@ -362,7 +360,7 @@ _G.updateMenuDisplay = function()
         if _G.cS == "Movement" then SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = false, true, true, false
         else
             SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = true, true, false, true
-            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.55, 0), UDim2.new(0.9, 0, 0, 115)
+            SF.Position, SF.Size = UDim2.new(0.05, 0, 0.56, 0), UDim2.new(0.9, 0, 0, 120)
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
@@ -391,10 +389,29 @@ _G.updateMenuDisplay = function()
     end
 end
 
--- Dragging logic (unchanged)
-MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
-MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
-UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+-- Dragging (with screen bounds)
+local dragging, dragStart, startPos, dragInput = false
+MainFrame.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = i.Position
+        startPos = MainFrame.Position
+        i.Changed:Connect(function()
+            if i.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+MainFrame.InputChanged:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
+        dragInput = i
+    end
+end)
+UserInputService.InputChanged:Connect(function(i)
+    if i == dragInput and dragging then
+        local delta = i.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
 
 -- Fly loop (smooth, camera-relative, fixed speed)
 local flySpeed = 30
