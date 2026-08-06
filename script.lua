@@ -186,20 +186,17 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
--- ФИКС СЕТКИ: Anti-Kill железно закреплен на 0.26
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.25, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
 
--- ФИКС СЕТКИ: SearchBox строго на 0.38 (ровно 8 пикселей отступа под Anti-Kill)
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.34, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- ФИКС СЕТКИ: Кнопки Fly/Noclip строго на 0.38 (идеальное совпадение линий)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
-MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.38, 0), UDim2.new(0.9, 0, 0, 35)
+MoveControlsFrame.Name, MoveControlsFrame.BackgroundTransparency, MoveControlsFrame.Position, MoveControlsFrame.Size = "MoveControlsFrame", 1, UDim2.new(0.05, 0, 0.34, 0), UDim2.new(0.9, 0, 0, 40)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name, FlyBtn.Size, FlyBtn.Position, FlyBtn.BackgroundColor3, FlyBtn.Font, FlyBtn.Text, FlyBtn.TextColor3, FlyBtn.TextSize = "FlyBtn", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Fly: OFF", Color3.fromRGB(255, 255, 255), 13
@@ -208,7 +205,7 @@ Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
 NoclipBtn.Name, NoclipBtn.Size, NoclipBtn.Position, NoclipBtn.BackgroundColor3, NoclipBtn.Font, NoclipBtn.Text, NoclipBtn.TextColor3, NoclipBtn.TextSize = "NoclipBtn", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), Color3.fromRGB(55, 55, 60), Enum.Font.SourceSansBold, "Noclip: OFF", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
-
+-- part 4
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
@@ -243,19 +240,38 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-local flySpeed = 50
+-- МОДЕРНИЗИРОВАННЫЙ ЦИКЛ ПОЛЕТА: УБРАЛИ РЕГДОЛЛ И СДЕЛАЛИ ПОВОРОТ ТЕЛА
+local flySpeed = 22
 game:GetService("RunService").RenderStepped:Connect(function()
     if shared.CheatConfig.Fly and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         local root = LocalPlayer.Character.HumanoidRootPart
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        hum.PlatformStand = true
+        local cam = Workspace.CurrentCamera
+        
+        hum.PlatformStand = false -- Фикс бесконечного падения
+        root.Velocity = Vector3.new(0, 0, 0)
+        
+        -- СИНХРОНИЗАЦИЯ ТОРСА: Поворачиваем персонажа лицом туда, куда смотрит камера
+        local camLook = cam.CFrame.LookVector
+        root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camLook.X, 0, camLook.Z))
+        
         local moveDir = hum.MoveDirection
-        local velocity = moveDir * flySpeed
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then velocity = velocity + Vector3.new(0, flySpeed, 0)
-        elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then velocity = velocity + Vector3.new(0, -flySpeed, 0) end
-        root.Velocity = velocity
-    elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and not shared.CheatConfig.Fly then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").PlatformStand = false
+        if moveDir.Magnitude > 0 then
+            local camCFrame = cam.CFrame
+            local lookVector = camCFrame.LookVector
+            local rightVector = camCFrame.RightVector
+            local finalVelocity = Vector3.new(0,0,0)
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then finalVelocity = finalVelocity + lookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then finalVelocity = finalVelocity - lookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then finalVelocity = finalVelocity - rightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then finalVelocity = finalVelocity + rightVector end
+            
+            if finalVelocity.Magnitude == 0 then
+                finalVelocity = (camCFrame * CFrame.new(moveDir)).Position - camCFrame.Position
+            end
+            root.Velocity = finalVelocity.Unit * flySpeed
+        end
     end
 end)
 
@@ -278,7 +294,7 @@ local iK = {
     "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"
 }
 local sJ = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle"}
--- part 4
+-- part 5
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") then child:Destroy() end end
     local ad, te = {}, 0
@@ -325,7 +341,7 @@ _G.updateMenuDisplay = function()
                 eB.MouseButton1Click:Connect(function() pcall(function() if p.Character and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0) end end) end)
             end
         end
--- part 5
+-- part 6
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
         MainFrame.Size = UDim2.new(0, 260, 0, 350)
