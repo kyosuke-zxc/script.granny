@@ -358,8 +358,7 @@ end
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
-
--- part 6 - SMOOTH ROOT JOINT FLY (Character follows camera naturally)
+-- part 6 - PERFECT FLY (No spinning, no ragdoll, smooth rotation)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -370,7 +369,7 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
     
-    -- Find the root joint for smooth rotation
+    -- Find the root joint for rotation
     local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
     local rootJoint = nil
     if torso and hrp then
@@ -382,9 +381,10 @@ local function startFly()
         end
     end
     
+    -- DISABLE EVERYTHING that causes spinning/ragdoll
     hum.PlatformStand = true
     hum.AutoRotate = false
-    hum:ChangeState(Enum.HumanoidStateType.Running)
+    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- Full physics state = no animations
     Workspace.Gravity = 0
     
     if flyConnection then flyConnection:Disconnect() end
@@ -411,7 +411,7 @@ local function startFly()
             hrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- Smooth rotation using root joint (follows camera naturally)
+        -- Smooth rotation using root joint (follows camera in full 3D)
         local lookDir = lookVec
         if lookDir.Magnitude > 0 and rootJoint then
             local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
@@ -434,6 +434,7 @@ local function stopFly()
         if hum then
             hum.PlatformStand = false
             hum.AutoRotate = true
+            hum:ChangeState(Enum.HumanoidStateType.Running)
             Workspace.Gravity = 196.2
         end
     end
