@@ -359,7 +359,7 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
--- part 6 - THE BIG W FLY (rootJoint rotation, full 3D, smooth, fixed speed 30)
+-- part 6 - SMOOTH ROOT JOINT FLY (Character follows camera naturally)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -371,21 +371,19 @@ local function startFly()
     if not hum or not hrp then return end
     
     -- Find the root joint for smooth rotation
-    local rootPart = char:FindFirstChild("HumanoidRootPart")
     local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
     local rootJoint = nil
-    if torso and rootPart then
+    if torso and hrp then
         for _, joint in pairs(torso:GetDescendants()) do
-            if joint:IsA("Motor6D") and joint.Part0 == rootPart and joint.Part1 == torso then
+            if joint:IsA("Motor6D") and joint.Part0 == hrp and joint.Part1 == torso then
                 rootJoint = joint
                 break
             end
         end
     end
     
-    -- Disable auto-rotation so the humanoid doesn't fight our rootJoint changes
-    hum.AutoRotate = false
     hum.PlatformStand = true
+    hum.AutoRotate = false
     hum:ChangeState(Enum.HumanoidStateType.Running)
     Workspace.Gravity = 0
     
@@ -396,18 +394,6 @@ local function startFly()
             flyConnection = nil
             return
         end
-        
-        local currentChar = LocalPlayer.Character
-        if not currentChar then return end
-        local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
-        local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
-        if not currentHrp or not currentHum then return end
-        
-        -- Keep settings applied every frame
-        currentHum.AutoRotate = false
-        currentHum.PlatformStand = true
-        currentHum:ChangeState(Enum.HumanoidStateType.Running)
-        Workspace.Gravity = 0
         
         local cam = Workspace.CurrentCamera
         local lookVec = cam.CFrame.LookVector
@@ -420,21 +406,19 @@ local function startFly()
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + rightVec end
         
         if vel.Magnitude > 0 then
-            currentHrp.Velocity = vel.Unit * flySpeed
+            hrp.Velocity = vel.Unit * flySpeed
         else
-            currentHrp.Velocity = Vector3.new(0, 0, 0)
+            hrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- FULL 3D ROTATION via root joint (smooth, follows camera up/down/left/right)
+        -- Smooth rotation using root joint (follows camera naturally)
         local lookDir = lookVec
-        if lookDir.Magnitude > 0 then
+        if lookDir.Magnitude > 0 and rootJoint then
             local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
             local verticalAngle = math.asin(math.clamp(lookDir.Y, -1, 1))
             
-            if rootJoint then
-                local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
-                rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
-            end
+            local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
+            rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
         end
     end)
 end
@@ -448,9 +432,8 @@ local function stopFly()
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
-            hum.AutoRotate = true
             hum.PlatformStand = false
-            hum:ChangeState(Enum.HumanoidStateType.Running)
+            hum.AutoRotate = true
             Workspace.Gravity = 196.2
         end
     end
