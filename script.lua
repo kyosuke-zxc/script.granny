@@ -383,6 +383,8 @@ local function startFly()
         end
     end
     
+    -- Disable auto-rotation so the humanoid doesn't fight our rootJoint changes
+    hum.AutoRotate = false
     hum.PlatformStand = true
     hum:ChangeState(Enum.HumanoidStateType.Running)
     Workspace.Gravity = 0
@@ -400,6 +402,12 @@ local function startFly()
         local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
+        
+        -- Keep settings applied every frame
+        currentHum.AutoRotate = false
+        currentHum.PlatformStand = true
+        currentHum:ChangeState(Enum.HumanoidStateType.Running)
+        Workspace.Gravity = 0
         
         local cam = Workspace.CurrentCamera
         local lookVec = cam.CFrame.LookVector
@@ -440,7 +448,9 @@ local function stopFly()
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
+            hum.AutoRotate = true
             hum.PlatformStand = false
+            hum:ChangeState(Enum.HumanoidStateType.Running)
             Workspace.Gravity = 196.2
         end
     end
