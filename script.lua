@@ -358,8 +358,7 @@ end
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
--- part 6
--- SMOOTH INFINITE YIELD FLY - No spasms, smooth rotation, fixed speed (30)
+-- part 6 - PERFECT FLY (No ragdoll, full 3D rotation, camera-relative)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -370,21 +369,11 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
     
-    -- Store the original root joint C0 for smooth rotation
-    local rootPart = char:FindFirstChild("HumanoidRootPart")
-    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-    local rootJoint = nil
-    if torso and rootPart then
-        for _, joint in pairs(torso:GetDescendants()) do
-            if joint:IsA("Motor6D") and joint.Part0 == rootPart and joint.Part1 == torso then
-                rootJoint = joint
-                break
-            end
-        end
-    end
-    
+    -- KILL RAGDOLL COMPLETELY
     hum.PlatformStand = true
-    hum:ChangeState(Enum.HumanoidStateType.Running)
+    hum.AutoRotate = false
+    hum:BreakJoints()  -- Breaks all joints = no floppy limbs
+    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- Physics state = no animations
     Workspace.Gravity = 0
     
     if flyConnection then flyConnection:Disconnect() end
@@ -395,13 +384,18 @@ local function startFly()
             return
         end
         
-        -- Refresh character parts (in case of respawn)
         local currentChar = LocalPlayer.Character
         if not currentChar then return end
         local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
         
+        -- Keep ragdoll disabled every frame
+        currentHum.PlatformStand = true
+        currentHum.AutoRotate = false
+        currentHum:ChangeState(Enum.HumanoidStateType.Physics)
+        
+        -- Movement (camera-relative)
         local cam = Workspace.CurrentCamera
         local lookVec = cam.CFrame.LookVector
         local rightVec = cam.CFrame.RightVector
@@ -418,19 +412,10 @@ local function startFly()
             currentHrp.Velocity = Vector3.new(0, 0, 0)
         end
         
-        -- SMOOTH ROTATION: Use root joint to rotate torso instead of forcing CFrame
+        -- FULL 3D ROTATION (character faces exactly where camera looks, including up/down)
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
-            -- Get the horizontal and vertical angles
-            local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
-            local verticalAngle = math.asin(math.clamp(lookDir.Y, -1, 1))
-            
-            -- Apply rotation through root joint (smooth, no spasms)
-            if rootJoint then
-                -- Create a smooth CFrame rotation
-                local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
-                rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
-            end
+            currentHrp.CFrame = CFrame.lookAt(currentHrp.Position, currentHrp.Position + lookDir, Vector3.new(0, 1, 0))
         end
     end)
 end
@@ -445,6 +430,8 @@ local function stopFly()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.PlatformStand = false
+            hum.AutoRotate = true
+            hum:ChangeState(Enum.HumanoidStateType.Running)
             Workspace.Gravity = 196.2
         end
     end
