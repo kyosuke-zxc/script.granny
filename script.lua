@@ -358,7 +358,7 @@ end
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
--- part 6 - PERFECT FLY (No spinning, no ragdoll, smooth rotation)
+-- part 6 - FIXED FLY (Follows camera perfectly, no spinning)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -368,25 +368,13 @@ local function startFly()
     local hum = char:FindFirstChildOfClass("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
-    
-    -- Find the root joint for rotation
-    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-    local rootJoint = nil
-    if torso and hrp then
-        for _, joint in pairs(torso:GetDescendants()) do
-            if joint:IsA("Motor6D") and joint.Part0 == hrp and joint.Part1 == torso then
-                rootJoint = joint
-                break
-            end
-        end
-    end
-    
-    -- DISABLE EVERYTHING that causes spinning/ragdoll
+
+    -- KILL ALL ANIMATIONS AND RAGDOLL
     hum.PlatformStand = true
     hum.AutoRotate = false
-    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- Full physics state = no animations
+    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- Disables all animations
     Workspace.Gravity = 0
-    
+
     if flyConnection then flyConnection:Disconnect() end
     flyConnection = RunService.RenderStepped:Connect(function()
         if not shared.CheatConfig.Fly then
@@ -394,32 +382,34 @@ local function startFly()
             flyConnection = nil
             return
         end
-        
+
         local cam = Workspace.CurrentCamera
         local lookVec = cam.CFrame.LookVector
         local rightVec = cam.CFrame.RightVector
         local vel = Vector3.new()
-        
+
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + lookVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - lookVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - rightVec end
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + rightVec end
-        
+
         if vel.Magnitude > 0 then
             hrp.Velocity = vel.Unit * flySpeed
         else
             hrp.Velocity = Vector3.new(0, 0, 0)
         end
-        
-        -- Smooth rotation using root joint (follows camera in full 3D)
+
+        -- ROTATE THE CHARACTER TO FACE CAMERA (full 3D)
         local lookDir = lookVec
-        if lookDir.Magnitude > 0 and rootJoint then
-            local horizontalAngle = math.atan2(lookDir.X, lookDir.Z)
-            local verticalAngle = math.asin(math.clamp(lookDir.Y, -1, 1))
-            
-            local targetCF = CFrame.new(0, 0, 0) * CFrame.Angles(0, horizontalAngle, 0) * CFrame.Angles(-verticalAngle, 0, 0)
-            rootJoint.C0 = rootJoint.C0:Lerp(targetCF, 0.3)
+        if lookDir.Magnitude > 0 then
+            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + lookDir, Vector3.new(0, 1, 0))
         end
+
+        -- Ensure physics state is maintained every frame
+        hum.PlatformStand = true
+        hum.AutoRotate = false
+        hum:ChangeState(Enum.HumanoidStateType.Physics)
+        Workspace.Gravity = 0
     end)
 end
 
