@@ -358,7 +358,8 @@ end
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
--- part 6 - FIXED FLY (Follows camera perfectly, no spinning)
+
+-- part 6 - FIXED FLY (Follows camera perfectly, no spinning, like shiftlock)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -399,7 +400,7 @@ local function startFly()
             hrp.Velocity = Vector3.new(0, 0, 0)
         end
 
-        -- ROTATE THE CHARACTER TO FACE CAMERA (full 3D)
+        -- ROTATE THE CHARACTER TO FACE CAMERA (full 3D, like shiftlock)
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
             hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + lookDir, Vector3.new(0, 1, 0))
