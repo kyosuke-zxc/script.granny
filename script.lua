@@ -18,11 +18,9 @@ _G.ItemWhitelist = {
     "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
     "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
     "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
-    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel",
-    -- ADD ANY OTHER ITEM NAMES HERE
+    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel"
 }
 
--- ========== BLACKLIST (never show) ==========
 _G.StructureBlacklist = {
     "Door", "Frame", "Wall", "Floor", "Ceiling", "Vent", "Slider", "Panel",
     "Window", "Gate", "Fence", "Roof", "Stair", "Step", "Railing", "Pillar",
@@ -31,21 +29,42 @@ _G.StructureBlacklist = {
     "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf"
 }
 
+-- Cache for item detection (so we don't re‑check same object)
+local ItemCache = {}
+local ItemCacheTime = 0
+
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
     if Players:GetPlayerFromCharacter(obj) then return false end
     
+    local id = obj:GetDebugId()
+    if ItemCache[id] ~= nil and tick() - ItemCacheTime < 5 then
+        return ItemCache[id]
+    end
+    
     local name = obj.Name
-    -- Check blacklist first
     for _, black in pairs(_G.StructureBlacklist) do
-        if string.find(name, black) then return false end
+        if string.find(name, black) then
+            ItemCache[id] = false
+            return false
+        end
     end
-    -- Check whitelist
     for _, item in pairs(_G.ItemWhitelist) do
-        if string.find(name, item) then return true end
+        if string.find(name, item) then
+            ItemCache[id] = true
+            return true
+        end
     end
+    ItemCache[id] = false
     return false
 end
+
+task.spawn(function()
+    while task.wait(10) do
+        ItemCache = {}
+        ItemCacheTime = tick()
+    end
+end)
 
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
@@ -137,8 +156,13 @@ end
 for _, p in pairs(Players:GetPlayers()) do watchPlayer(p) end
 Players.PlayerAdded:Connect(watchPlayer)
 
+-- OPTIMIZED SCAN
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait(2) do
+        if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
+            continue
+        end
+        
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
@@ -153,24 +177,16 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- ITEM ESP - ONLY HIGHLIGHT (NO BILLBOARD GUI)
-                    if _G.isObjectAnItem(obj) then
-                        if shared.CheatConfig.ItemsESP then
-                            if not obj:FindFirstChild("UniversalWhiteItemESP") then
-                                local hl = Instance.new("Highlight", obj)
-                                hl.Name = "UniversalWhiteItemESP"
-                                hl.FillColor = Color3.fromRGB(255, 255, 255)
-                                hl.FillTransparency = 0.25
-                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                            end
-                        else
-                            if obj:FindFirstChild("UniversalWhiteItemESP") then
-                                obj["UniversalWhiteItemESP"]:Destroy()
-                            end
+                    if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
+                        if not obj:FindFirstChild("UniversalWhiteItemESP") then
+                            local hl = Instance.new("Highlight", obj)
+                            hl.Name = "UniversalWhiteItemESP"
+                            hl.FillColor = Color3.fromRGB(255, 255, 255)
+                            hl.FillTransparency = 0.25
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                         end
                     else
-                        -- Clean up non-items
                         if obj:FindFirstChild("UniversalWhiteItemESP") then
                             obj["UniversalWhiteItemESP"]:Destroy()
                         end
@@ -371,7 +387,7 @@ MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputT
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
 -- ================================================
--- part 6 - FLY (PERFECT - WITH EXTRA FREEZE PROTECTION)
+-- part 6 - FLY (FROZEN + CHARACTER CENTERED)
 -- ================================================
 local flySpeed = 30
 local flyConnection = nil
@@ -382,6 +398,13 @@ local function startFly()
     local hum = char:FindFirstChildOfClass("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
+
+    -- Force camera to follow HRP perfectly (centered)
+    if shared.CheatConfig.ThirdPerson then
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        LocalPlayer.CameraMaxZoomDistance = 35
+        LocalPlayer.CameraMinZoomDistance = 10
+    end
 
     hum.PlatformStand = true
     hum.AutoRotate = false
@@ -405,7 +428,7 @@ local function startFly()
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
 
-        -- FREEZE EVERYTHING
+        -- Freeze everything
         currentHum.PlatformStand = true
         currentHum.AutoRotate = false
         currentHum.WalkSpeed = 0
@@ -426,10 +449,9 @@ local function startFly()
 
         if vel.Magnitude > 0 then
             currentHrp.Velocity = vel.Unit * flySpeed
-            currentHrp.AssemblyLinearVelocity = vel.Unit * flySpeed  -- extra freeze kill
         else
             currentHrp.Velocity = Vector3.new(0, 0, 0)
-            currentHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- ensure no drift
+            currentHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
         end
 
         -- Rotate character to face camera
