@@ -18,7 +18,8 @@ _G.ItemWhitelist = {
     "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
     "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
     "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
-    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel", "Safe key"
+    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel", 
+    "Safe key", "Car battery"
 }
 
 _G.StructureBlacklist = {
