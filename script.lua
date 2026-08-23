@@ -5,76 +5,48 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local CollectionService = game:GetService("CollectionService")  -- for FireTag
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- ITEM KEYWORDS (actual items/collectibles)
-_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "plank", "nail", "wire", "rope", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "brick", "clay", "glass", "wood", "stone", "bronze", "copper", "iron", "steel"}
+-- ========== CUSTOMIZE THIS LIST ==========
+-- Add the exact names of items you want to see.
+_G.ItemWhitelist = {
+    "Key", "Padlock", "Hammer", "Cog", "Shotgun", "Weapon", "Gasoline", "Fuel",
+    "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon",
+    "Pliers", "Crowbar", "Wrench", "Screwdriver", "Meat", "Winch", "Handle",
+    "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
+    "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
+    "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
+    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel"
+    -- Add more item names here
+}
+
+-- ========== BLACKLIST (never show) ==========
+_G.StructureBlacklist = {
+    "Door", "Frame", "Wall", "Floor", "Ceiling", "Vent", "Slider", "Panel",
+    "Window", "Gate", "Fence", "Roof", "Stair", "Step", "Railing", "Pillar",
+    "Column", "Beam", "Girder", "Truss", "Scaffold", "Platform", "Ramp",
+    "Elevator", "Ladder", "VentFrame", "WallPanel", "Frames", "Floor1", "Floor2",
+    "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf"
+}
 
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
+    if Players:GetPlayerFromCharacter(obj) then return false end
     
-    -- Ignore player characters
-    if Players:GetPlayerFromCharacter(obj) then
-        return false
+    local name = obj.Name
+    -- Check blacklist first
+    for _, black in pairs(_G.StructureBlacklist) do
+        if string.find(name, black) then return false end
     end
-    
-    local nameLower = string.lower(obj.Name)
-    local parentName = obj.Parent and obj.Parent:IsA("Model") and string.lower(obj.Parent.Name) or ""
-    
-    -- METHOD 1: ClickDetector / ProximityPrompt
-    if obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true) then
-        return true
+    -- Check whitelist
+    for _, item in pairs(_G.ItemWhitelist) do
+        if string.find(name, item) then return true end
     end
-    
-    -- METHOD 2: CollectionService tags (FireTag)
-    local tags = CollectionService:GetTags(obj)
-    for _, tag in pairs(tags) do
-        local tagLower = string.lower(tag)
-        if string.find(tagLower, "item") or string.find(tagLower, "pickup") or string.find(tagLower, "collect") or string.find(tagLower, "take") then
-            return true
-        end
-    end
-    
-    -- METHOD 3: Item keywords in name
-    for _, kw in pairs(_G.iK_Global) do
-        if string.find(nameLower, kw) then
-            return true
-        end
-    end
-    
-    -- METHOD 4: Item keywords in parent name (for nested items)
-    for _, kw in pairs(_G.iK_Global) do
-        if string.find(parentName, kw) then
-            return true
-        end
-    end
-    
     return false
 end
-
--- DEBUG: Print all detected items to console (F9)
-task.spawn(function()
-    task.wait(2)
-    print("========== [ITEM SCAN] Detected Items ==========")
-    local found = 0
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("Model") and _G.isObjectAnItem(obj) then
-            found = found + 1
-            print(found .. ". " .. obj.Name .. "  |  Parent: " .. (obj.Parent and obj.Parent.Name or "nil"))
-        end
-    end
-    if found == 0 then
-        print("No items found! Check if the game uses a different detection method.")
-        print("Try looking for ClickDetectors, ProximityPrompts, or FireTags.")
-    else
-        print("Total items found: " .. found)
-    end
-    print("================================================")
-end)
 
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
@@ -171,7 +143,6 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    -- Skip player characters
                     if Players:GetPlayerFromCharacter(obj) then
                         if shared.CheatConfig.PlayersESP then
                             local player = Players:GetPlayerFromCharacter(obj)
@@ -183,42 +154,26 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- ITEM ESP - using the improved detection
+                    -- ITEM ESP - ONLY HIGHLIGHT, NO BILLBOARD TEXT
                     if _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
-                            local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
-                            if targetPart then
-                                if not obj:FindFirstChild("UniversalWhiteItemESP") then
-                                    local hl = Instance.new("Highlight", obj)
-                                    hl.Name = "UniversalWhiteItemESP"
-                                    hl.FillColor = Color3.fromRGB(255, 255, 255)
-                                    hl.FillTransparency = 0.4
-                                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                                    
-                                    local bgui = Instance.new("BillboardGui", targetPart)
-                                    bgui.Name = "UniversalWhiteItemESPText"
-                                    bgui.Size = UDim2.new(0, 120, 0, 25)
-                                    bgui.StudsOffset = Vector3.new(0, 2, 0)
-                                    bgui.AlwaysOnTop = true
-                                    local label = Instance.new("TextLabel", bgui)
-                                    label.Size = UDim2.new(1, 0, 1, 0)
-                                    label.BackgroundTransparency = 1
-                                    label.Text = obj.Name
-                                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                    label.TextStrokeTransparency = 0
-                                    label.Font = Enum.Font.SourceSansBold
-                                    label.TextSize = 11
-                                    label.Parent = bgui
-                                    bgui.Parent = targetPart
-                                end
+                            if not obj:FindFirstChild("UniversalWhiteItemESP") then
+                                local hl = Instance.new("Highlight", obj)
+                                hl.Name = "UniversalWhiteItemESP"
+                                hl.FillColor = Color3.fromRGB(255, 255, 255)
+                                hl.FillTransparency = 0.3
+                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                             end
                         else
-                            if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
-                            local foundPart = obj:FindFirstChildWhichIsA("BasePart", true)
-                            if foundPart and foundPart:FindFirstChild("UniversalWhiteItemESPText") then
-                                foundPart["UniversalWhiteItemESPText"]:Destroy()
+                            if obj:FindFirstChild("UniversalWhiteItemESP") then
+                                obj["UniversalWhiteItemESP"]:Destroy()
                             end
+                        end
+                    else
+                        -- Clean up non-items
+                        if obj:FindFirstChild("UniversalWhiteItemESP") then
+                            obj["UniversalWhiteItemESP"]:Destroy()
                         end
                     end
                 end
@@ -416,7 +371,9 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
--- part 6 - FLY (PERFECT - DO NOT TOUCH)
+-- ================================================
+-- part 6 - FLY (EXACTLY AS YOU HAD IT - UNTOUCHED)
+-- ================================================
 local flySpeed = 30
 local flyConnection = nil
 
