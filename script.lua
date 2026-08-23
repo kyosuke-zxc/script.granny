@@ -26,7 +26,7 @@ _G.StructureBlacklist = {
     "Column", "Beam", "Girder", "Truss", "Scaffold", "Platform", "Ramp",
     "Elevator", "Ladder", "VentFrame", "WallPanel", "Frames", "Floor1", "Floor2",
     "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf", "Locked board", 
-    "Rope", "Winch", "Puzzle"
+    "Rope", "Winch", "Plank puzzle", "Plank gate"
 }
 
 -- Cache for item detection
