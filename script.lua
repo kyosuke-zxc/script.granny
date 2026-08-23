@@ -5,12 +5,15 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local CollectionService = game:GetService("CollectionService")  -- for FireTag
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- SIMPLE ITEM DETECTION - anything with ClickDetector or ProximityPrompt is an item
+-- ITEM KEYWORDS (actual items/collectibles)
+_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "plank", "nail", "wire", "rope", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "brick", "clay", "glass", "wood", "stone", "bronze", "copper", "iron", "steel"}
+
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
     
@@ -19,22 +22,59 @@ _G.isObjectAnItem = function(obj)
         return false
     end
     
-    -- Check if it has a ClickDetector or ProximityPrompt anywhere inside it
+    local nameLower = string.lower(obj.Name)
+    local parentName = obj.Parent and obj.Parent:IsA("Model") and string.lower(obj.Parent.Name) or ""
+    
+    -- METHOD 1: ClickDetector / ProximityPrompt
     if obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true) then
         return true
     end
     
-    -- Check if any child part has a ClickDetector/ProximityPrompt (common in Granny)
-    for _, child in pairs(obj:GetDescendants()) do
-        if child:IsA("BasePart") then
-            if child:FindFirstChildWhichIsA("ClickDetector", true) or child:FindFirstChildWhichIsA("ProximityPrompt", true) then
-                return true
-            end
+    -- METHOD 2: CollectionService tags (FireTag)
+    local tags = CollectionService:GetTags(obj)
+    for _, tag in pairs(tags) do
+        local tagLower = string.lower(tag)
+        if string.find(tagLower, "item") or string.find(tagLower, "pickup") or string.find(tagLower, "collect") or string.find(tagLower, "take") then
+            return true
+        end
+    end
+    
+    -- METHOD 3: Item keywords in name
+    for _, kw in pairs(_G.iK_Global) do
+        if string.find(nameLower, kw) then
+            return true
+        end
+    end
+    
+    -- METHOD 4: Item keywords in parent name (for nested items)
+    for _, kw in pairs(_G.iK_Global) do
+        if string.find(parentName, kw) then
+            return true
         end
     end
     
     return false
 end
+
+-- DEBUG: Print all detected items to console (F9)
+task.spawn(function()
+    task.wait(2)
+    print("========== [ITEM SCAN] Detected Items ==========")
+    local found = 0
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and _G.isObjectAnItem(obj) then
+            found = found + 1
+            print(found .. ". " .. obj.Name .. "  |  Parent: " .. (obj.Parent and obj.Parent.Name or "nil"))
+        end
+    end
+    if found == 0 then
+        print("No items found! Check if the game uses a different detection method.")
+        print("Try looking for ClickDetectors, ProximityPrompts, or FireTags.")
+    else
+        print("Total items found: " .. found)
+    end
+    print("================================================")
+end)
 
 RunService.RenderStepped:Connect(function()
     if shared.CheatConfig.ThirdPerson then
@@ -143,7 +183,7 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- ITEM ESP - SIMPLE: anything with ClickDetector/ProximityPrompt glows white
+                    -- ITEM ESP - using the improved detection
                     if _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
