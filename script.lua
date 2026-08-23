@@ -13,13 +13,11 @@ shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = f
 -- ========== CUSTOMIZE YOUR ITEMS HERE ==========
 _G.ItemWhitelist = {
     "Key", "Padlock", "Hammer", "Cog", "Shotgun", "Weapon", "Gasoline", "Fuel",
-    "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon",
-    "Pliers", "Crowbar", "Wrench", "Screwdriver", "Meat", "Winch", "Handle",
-    "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
-    "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
-    "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
-    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel", 
-    "Safe key", "Car battery"
+    "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon", "Crowbar",
+    "Wrench", "Screwdriver", "Meat", "Winch handle","Valve", "Remote", "Card", "Code", 
+    "Ticket", "Coin", "Tool", "Gun", "Ammo", "Ruby", "Diamond", "Emerald", "Plank",
+    "Lock", "Box", "Crate", "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe",
+    "Pickaxe", "Shovel", "Safe key", "Car battery"
 }
 
 _G.StructureBlacklist = {
@@ -28,7 +26,7 @@ _G.StructureBlacklist = {
     "Column", "Beam", "Girder", "Truss", "Scaffold", "Platform", "Ramp",
     "Elevator", "Ladder", "VentFrame", "WallPanel", "Frames", "Floor1", "Floor2",
     "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf", "Locked board", 
-    "Rope", "Winch", "Plank puzzle"
+    "Rope", "Winch", "Puzzle"
 }
 
 -- Cache for item detection
