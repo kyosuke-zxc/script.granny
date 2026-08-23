@@ -10,8 +10,9 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
-_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo"}
-_G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"}
+-- ADDED MORE ITEM KEYWORDS (ruby, diamond, emerald, gem, crystal, etc.)
+_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "bronze", "copper", "iron", "steel", "glass", "wood", "stone", "brick", "clay", "rope", "wire", "chain", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "hoe", "scythe", "wand", "staff", "bow", "arrow", "bullet", "shell", "bomb", "grenade", "mine", "trap", "camera", "phone", "radio", "map", "compass", "lighter", "flashlight", "battery", "generator", "motor", "wheel", "gear", "screw", "nail", "bolt", "nut", "washer", "spring", "chain", "belt", "pulley", "lever", "button", "switch", "sensor", "detector", "alarm", "safe", "vault", "door", "gate", "fence", "wall", "floor", "ceiling", "roof", "window", "glass", "mirror", "frame", "picture", "painting", "statue", "bust", "urn", "coffin", "sarcophagus", "shelf", "cabinet", "drawer", "chest", "trunk", "bag", "backpack", "pouch", "purse", "wallet", "money", "cash", "check", "receipt", "ticket", "passport", "id", "badge", "medal", "trophy", "cup", "plate", "bowl", "fork", "spoon", "knife", "cup", "glass", "bottle", "jug", "pitcher", "kettle", "pot", "pan", "tray", "basket", "bucket", "barrel", "crate", "box", "chest", "trunk", "bag", "sack", "package", "parcel", "envelope", "letter", "note", "book", "magazine", "newspaper", "map", "blueprint", "diagram", "schematic", "plan", "drawing", "sketch", "photo", "picture", "poster", "sign", "billboard", "notice", "warning", "instruction", "manual", "guide", "catalog", "brochure", "flyer", "pamphlet", "leaflet"}
+_G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"} -- kept but not used much
 
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
@@ -138,7 +139,34 @@ task.spawn(function()
                         end
                     end
                     
-                    if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
+                    -- FIXED ITEM ESP - Shows ALL items with ClickDetector/ProximityPrompt OR matching keywords
+                    local isItem = false
+                    -- Check if the model itself has a ClickDetector or ProximityPrompt anywhere in its descendants
+                    local hasPrompt = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                    if hasPrompt then
+                        isItem = true
+                    else
+                        -- Check if name matches any keyword
+                        local nameLower = string.lower(obj.Name)
+                        for _, kw in pairs(_G.iK_Global) do
+                            if string.find(nameLower, kw) then
+                                isItem = true
+                                break
+                            end
+                        end
+                    end
+                    
+                    -- Also check if any child part has a ClickDetector (sometimes the detector is on a part, not the model)
+                    if not isItem then
+                        for _, child in pairs(obj:GetDescendants()) do
+                            if child:IsA("BasePart") and (child:FindFirstChildWhichIsA("ClickDetector", true) or child:FindFirstChildWhichIsA("ProximityPrompt", true)) then
+                                isItem = true
+                                break
+                            end
+                        end
+                    end
+                    
+                    if isItem then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
                             if targetPart then
@@ -359,7 +387,7 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
--- part 6 - FIXED FLY (Follows camera perfectly, no spinning, like shiftlock)
+-- part 6 - FIXED FLY (Completely still, no running/falling animations)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -370,10 +398,13 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
 
-    -- KILL ALL ANIMATIONS AND RAGDOLL
+    -- FREEZE EVERYTHING - completely still
     hum.PlatformStand = true
     hum.AutoRotate = false
-    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- Disables all animations
+    hum.WalkSpeed = 0
+    hum.JumpPower = 0
+    hum.HipHeight = 0
+    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- kills all animations
     Workspace.Gravity = 0
 
     if flyConnection then flyConnection:Disconnect() end
@@ -383,6 +414,22 @@ local function startFly()
             flyConnection = nil
             return
         end
+
+        -- Refresh character in case of respawn
+        local currentChar = LocalPlayer.Character
+        if not currentChar then return end
+        local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
+        local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
+        if not currentHrp or not currentHum then return end
+
+        -- Keep everything frozen
+        currentHum.PlatformStand = true
+        currentHum.AutoRotate = false
+        currentHum.WalkSpeed = 0
+        currentHum.JumpPower = 0
+        currentHum.HipHeight = 0
+        currentHum:ChangeState(Enum.HumanoidStateType.Physics)
+        Workspace.Gravity = 0
 
         local cam = Workspace.CurrentCamera
         local lookVec = cam.CFrame.LookVector
@@ -395,22 +442,16 @@ local function startFly()
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + rightVec end
 
         if vel.Magnitude > 0 then
-            hrp.Velocity = vel.Unit * flySpeed
+            currentHrp.Velocity = vel.Unit * flySpeed
         else
-            hrp.Velocity = Vector3.new(0, 0, 0)
+            currentHrp.Velocity = Vector3.new(0, 0, 0)
         end
 
-        -- ROTATE THE CHARACTER TO FACE CAMERA (full 3D, like shiftlock)
+        -- Rotate character to face camera (full 3D)
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
-            hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + lookDir, Vector3.new(0, 1, 0))
+            currentHrp.CFrame = CFrame.lookAt(currentHrp.Position, currentHrp.Position + lookDir, Vector3.new(0, 1, 0))
         end
-
-        -- Ensure physics state is maintained every frame
-        hum.PlatformStand = true
-        hum.AutoRotate = false
-        hum:ChangeState(Enum.HumanoidStateType.Physics)
-        Workspace.Gravity = 0
     end)
 end
 
@@ -425,6 +466,9 @@ local function stopFly()
         if hum then
             hum.PlatformStand = false
             hum.AutoRotate = true
+            hum.WalkSpeed = 16
+            hum.JumpPower = 50
+            hum.HipHeight = 2
             hum:ChangeState(Enum.HumanoidStateType.Running)
             Workspace.Gravity = 196.2
         end
