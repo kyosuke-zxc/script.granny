@@ -29,7 +29,7 @@ _G.StructureBlacklist = {
     "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf"
 }
 
--- Cache for item detection (so we don't re‑check same object)
+-- Cache for item detection
 local ItemCache = {}
 local ItemCacheTime = 0
 
@@ -156,10 +156,72 @@ end
 for _, p in pairs(Players:GetPlayers()) do watchPlayer(p) end
 Players.PlayerAdded:Connect(watchPlayer)
 
--- OPTIMIZED SCAN
+-- ITEM ESP FUNCTION (Highlight + Name Label)
+local function applyItemESP(obj)
+    if not obj then return end
+    if obj:IsDescendantOf(LocalPlayer.Character) then return end -- SKIP HELD ITEMS
+    
+    -- Highlight
+    local hl = obj:FindFirstChild("UniversalWhiteItemESP")
+    if not hl then
+        hl = Instance.new("Highlight", obj)
+        hl.Name = "UniversalWhiteItemESP"
+        hl.FillColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.25
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    end
+    
+    -- Billboard label with name
+    local bgui = obj:FindFirstChild("UniversalWhiteItemESPText")
+    if not bgui then
+        local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
+        if targetPart then
+            bgui = Instance.new("BillboardGui", targetPart)
+            bgui.Name = "UniversalWhiteItemESPText"
+            bgui.Size = UDim2.new(0, 150, 0, 30)
+            bgui.StudsOffset = Vector3.new(0, 2.5, 0)
+            bgui.AlwaysOnTop = true
+            local label = Instance.new("TextLabel", bgui)
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = obj.Name
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextStrokeTransparency = 0
+            label.Font = Enum.Font.SourceSansBold
+            label.TextSize = 12
+            label.Parent = bgui
+            bgui.Parent = targetPart
+        end
+    end
+end
+
+local function removeItemESP(obj)
+    local hl = obj:FindFirstChild("UniversalWhiteItemESP")
+    if hl then hl:Destroy() end
+    local bgui = obj:FindFirstChild("UniversalWhiteItemESPText")
+    if bgui then bgui:Destroy() end
+    -- Also check descendants for BillboardGui on parts
+    for _, part in pairs(obj:GetDescendants()) do
+        if part:IsA("BasePart") then
+            local bg = part:FindFirstChild("UniversalWhiteItemESPText")
+            if bg then bg:Destroy() end
+        end
+    end
+end
+
+-- OPTIMIZED SCAN LOOP
 task.spawn(function()
     while task.wait(2) do
         if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
+            -- Cleanup everything if both off
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+                    if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
+                    if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
+                    removeItemESP(obj)
+                end
+            end
             continue
         end
         
@@ -174,22 +236,15 @@ task.spawn(function()
                             if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
                             if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
                         end
+                        removeItemESP(obj)  -- Remove any item ESP from players
                         continue
                     end
                     
+                    -- Item ESP - skip if held by player
                     if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
-                        if not obj:FindFirstChild("UniversalWhiteItemESP") then
-                            local hl = Instance.new("Highlight", obj)
-                            hl.Name = "UniversalWhiteItemESP"
-                            hl.FillColor = Color3.fromRGB(255, 255, 255)
-                            hl.FillTransparency = 0.25
-                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                        end
+                        applyItemESP(obj)
                     else
-                        if obj:FindFirstChild("UniversalWhiteItemESP") then
-                            obj["UniversalWhiteItemESP"]:Destroy()
-                        end
+                        removeItemESP(obj)
                     end
                 end
             end
@@ -387,7 +442,7 @@ MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputT
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
 -- ================================================
--- part 6 - FLY (FROZEN + CHARACTER CENTERED)
+-- part 6 - FLY (PERFECT CENTER + FREEZE)
 -- ================================================
 local flySpeed = 30
 local flyConnection = nil
@@ -399,7 +454,7 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
 
-    -- Force camera to follow HRP perfectly (centered)
+    -- Force camera to follow HRP perfectly
     if shared.CheatConfig.ThirdPerson then
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
         LocalPlayer.CameraMaxZoomDistance = 35
@@ -428,7 +483,7 @@ local function startFly()
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
 
-        -- Freeze everything
+        -- Freeze
         currentHum.PlatformStand = true
         currentHum.AutoRotate = false
         currentHum.WalkSpeed = 0
@@ -454,7 +509,6 @@ local function startFly()
             currentHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
         end
 
-        -- Rotate character to face camera
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
             currentHrp.CFrame = CFrame.lookAt(currentHrp.Position, currentHrp.Position + lookDir, Vector3.new(0, 1, 0))
