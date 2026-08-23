@@ -18,7 +18,7 @@ _G.ItemWhitelist = {
     "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
     "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
     "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
-    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel"
+    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel", "Safe key"
 }
 
 _G.StructureBlacklist = {
@@ -26,7 +26,7 @@ _G.StructureBlacklist = {
     "Window", "Gate", "Fence", "Roof", "Stair", "Step", "Railing", "Pillar",
     "Column", "Beam", "Girder", "Truss", "Scaffold", "Platform", "Ramp",
     "Elevator", "Ladder", "VentFrame", "WallPanel", "Frames", "Floor1", "Floor2",
-    "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf"
+    "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf", "Locked board", "Rope"
 }
 
 -- Cache for item detection
