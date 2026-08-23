@@ -10,12 +10,7 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- ITEM KEYWORDS (actual items/collectibles)
-_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "bronze", "copper", "iron", "steel", "glass", "wood", "stone", "brick", "clay", "rope", "wire", "chain", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "hoe", "scythe", "wand", "staff", "bow", "arrow", "bullet", "shell", "bomb", "grenade", "mine", "trap", "camera", "phone", "radio", "map", "compass", "lighter", "flashlight", "battery", "generator", "motor", "wheel", "gear", "screw", "nail", "bolt", "nut", "washer", "spring", "chain", "belt", "pulley", "lever", "button", "switch", "sensor", "detector", "alarm", "safe", "vault", "chest", "trunk", "bag", "backpack", "pouch", "purse", "wallet", "money", "cash", "check", "receipt", "ticket", "passport", "id", "badge", "medal", "trophy", "cup", "plate", "bowl", "fork", "spoon", "knife", "cup", "glass", "bottle", "jug", "pitcher", "kettle", "pot", "pan", "tray", "basket", "bucket", "barrel", "crate", "box", "chest", "trunk", "bag", "sack", "package", "parcel", "envelope", "letter", "note", "book", "magazine", "newspaper", "map", "blueprint", "diagram", "schematic", "plan", "drawing", "sketch", "photo", "picture", "poster", "sign", "billboard", "notice", "warning", "instruction", "manual", "guide", "catalog", "brochure", "flyer", "pamphlet", "leaflet", "redwire", "wire", "panel", "wallpanel", "mug", "cup", "bottle", "can"}
-
--- STRUCTURE BLACKLIST - these will NEVER show as items (doors, frames, walls, etc.)
-_G.structureBlacklist = {"door", "frame", "wall", "floor", "ceiling", "vent", "slider", "panel", "window", "gate", "fence", "roof", "stair", "step", "railing", "pillar", "column", "beam", "girder", "truss", "scaffold", "platform", "ramp", "elevator", "ladder", "ventframe", "wallpanel", "frames", "slider", "vent", "floor1", "floor2", "floor3", "wall1", "wall2", "wall3"}
-
+-- SIMPLE ITEM DETECTION - anything with ClickDetector or ProximityPrompt is an item
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
     
@@ -24,64 +19,17 @@ _G.isObjectAnItem = function(obj)
         return false
     end
     
-    local nameLower = string.lower(obj.Name)
-    
-    -- Check if it's a structure (door, frame, wall, etc.)
-    for _, junk in pairs(_G.structureBlacklist) do
-        if string.find(nameLower, junk) then
-            return false
-        end
+    -- Check if it has a ClickDetector or ProximityPrompt anywhere inside it
+    if obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true) then
+        return true
     end
     
-    -- Check if it has a ClickDetector or ProximityPrompt with a "Take/Pick up" type prompt
-    local hasPrompt = false
-    for _, prompt in pairs(obj:GetDescendants()) do
-        if prompt:IsA("ProximityPrompt") or prompt:IsA("ClickDetector") then
-            hasPrompt = true
-            -- If it has a ProximityPrompt, check if it's a "Take" or "Pick up" type
-            if prompt:IsA("ProximityPrompt") then
-                local actionText = prompt.ActionText or ""
-                local nameText = prompt.Name or ""
-                local lowerAction = string.lower(actionText)
-                local lowerName = string.lower(nameText)
-                -- Only count it as an item if the prompt is for taking/picking up
-                if string.find(lowerAction, "take") or string.find(lowerAction, "pick") or 
-                   string.find(lowerAction, "collect") or string.find(lowerAction, "grab") or
-                   string.find(lowerName, "take") or string.find(lowerName, "pick") then
-                    hasPrompt = true
-                else
-                    -- If it's a "Open" or "Close" prompt, it's a door/structure
-                    if string.find(lowerAction, "open") or string.find(lowerAction, "close") or
-                       string.find(lowerAction, "use") or string.find(lowerAction, "interact") then
-                        return false
-                    end
-                end
-            else
-                -- ClickDetector - check if it has a "Take" or "Pick" in its name
-                if string.find(string.lower(prompt.Name or ""), "take") or 
-                   string.find(string.lower(prompt.Name or ""), "pick") then
-                    hasPrompt = true
-                else
-                    -- If it's just a generic ClickDetector, check if the parent name contains item keywords
-                    local parentLower = string.lower(obj.Name)
-                    for _, kw in pairs(_G.iK_Global) do
-                        if string.find(parentLower, kw) then
-                            hasPrompt = true
-                            break
-                        end
-                    end
-                end
+    -- Check if any child part has a ClickDetector/ProximityPrompt (common in Granny)
+    for _, child in pairs(obj:GetDescendants()) do
+        if child:IsA("BasePart") then
+            if child:FindFirstChildWhichIsA("ClickDetector", true) or child:FindFirstChildWhichIsA("ProximityPrompt", true) then
+                return true
             end
-            break
-        end
-    end
-    
-    if hasPrompt then return true end
-    
-    -- Check if name contains any item keyword (last resort)
-    for _, kw in pairs(_G.iK_Global) do
-        if string.find(nameLower, kw) then
-            return true
         end
     end
     
@@ -183,9 +131,8 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    -- Skip player characters entirely
+                    -- Skip player characters
                     if Players:GetPlayerFromCharacter(obj) then
-                        -- Still apply player ESP if enabled
                         if shared.CheatConfig.PlayersESP then
                             local player = Players:GetPlayerFromCharacter(obj)
                             applyPlayersESP(obj, player and (player.DisplayName or player.Name) or "Bot")
@@ -196,8 +143,8 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- ITEM ESP - ONLY actual items (filters out players, doors, frames)
-                    if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
+                    -- ITEM ESP - SIMPLE: anything with ClickDetector/ProximityPrompt glows white
+                    if _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
                             if targetPart then
@@ -205,7 +152,7 @@ task.spawn(function()
                                     local hl = Instance.new("Highlight", obj)
                                     hl.Name = "UniversalWhiteItemESP"
                                     hl.FillColor = Color3.fromRGB(255, 255, 255)
-                                    hl.FillTransparency = 0.5
+                                    hl.FillTransparency = 0.4
                                     hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                                     hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                                     
@@ -389,11 +336,8 @@ _G.updateMenuDisplay = function()
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
-                    -- Skip player characters
-                    if Players:GetPlayerFromCharacter(obj) then
-                        continue
-                    end
-                    if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
+                    if Players:GetPlayerFromCharacter(obj) then continue end
+                    if _G.isObjectAnItem(obj) then
                         local current = obj
                         while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") do
                             current = current.Parent
