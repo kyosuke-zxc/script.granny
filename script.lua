@@ -10,8 +10,7 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- ========== CUSTOMIZE THIS LIST ==========
--- Add the exact names of items you want to see.
+-- ========== CUSTOMIZE YOUR ITEMS HERE ==========
 _G.ItemWhitelist = {
     "Key", "Padlock", "Hammer", "Cog", "Shotgun", "Weapon", "Gasoline", "Fuel",
     "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon",
@@ -19,8 +18,8 @@ _G.ItemWhitelist = {
     "Valve", "Remote", "Card", "Code", "Ticket", "Coin", "Tool", "Gun", "Ammo",
     "Ruby", "Diamond", "Emerald", "Sapphire", "Topaz", "Gem", "Crystal", "Jewel",
     "Gold", "Silver", "Plank", "Nail", "Wire", "Rope", "Lock", "Box", "Crate",
-    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel"
-    -- Add more item names here
+    "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe", "Pickaxe", "Shovel",
+    -- ADD ANY OTHER ITEM NAMES HERE
 }
 
 -- ========== BLACKLIST (never show) ==========
@@ -154,14 +153,14 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- ITEM ESP - ONLY HIGHLIGHT, NO BILLBOARD TEXT
+                    -- ITEM ESP - ONLY HIGHLIGHT (NO BILLBOARD GUI)
                     if _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             if not obj:FindFirstChild("UniversalWhiteItemESP") then
                                 local hl = Instance.new("Highlight", obj)
                                 hl.Name = "UniversalWhiteItemESP"
                                 hl.FillColor = Color3.fromRGB(255, 255, 255)
-                                hl.FillTransparency = 0.3
+                                hl.FillTransparency = 0.25
                                 hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                                 hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                             end
@@ -372,7 +371,7 @@ MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputT
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
 -- ================================================
--- part 6 - FLY (EXACTLY AS YOU HAD IT - UNTOUCHED)
+-- part 6 - FLY (PERFECT - WITH EXTRA FREEZE PROTECTION)
 -- ================================================
 local flySpeed = 30
 local flyConnection = nil
@@ -406,6 +405,7 @@ local function startFly()
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
 
+        -- FREEZE EVERYTHING
         currentHum.PlatformStand = true
         currentHum.AutoRotate = false
         currentHum.WalkSpeed = 0
@@ -426,10 +426,13 @@ local function startFly()
 
         if vel.Magnitude > 0 then
             currentHrp.Velocity = vel.Unit * flySpeed
+            currentHrp.AssemblyLinearVelocity = vel.Unit * flySpeed  -- extra freeze kill
         else
             currentHrp.Velocity = Vector3.new(0, 0, 0)
+            currentHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- ensure no drift
         end
 
+        -- Rotate character to face camera
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
             currentHrp.CFrame = CFrame.lookAt(currentHrp.Position, currentHrp.Position + lookDir, Vector3.new(0, 1, 0))
