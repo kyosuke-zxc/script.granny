@@ -10,27 +10,81 @@ if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean
 
 shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
 
--- ADDED MORE ITEM KEYWORDS (ruby, diamond, emerald, gem, crystal, etc.)
-_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "bronze", "copper", "iron", "steel", "glass", "wood", "stone", "brick", "clay", "rope", "wire", "chain", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "hoe", "scythe", "wand", "staff", "bow", "arrow", "bullet", "shell", "bomb", "grenade", "mine", "trap", "camera", "phone", "radio", "map", "compass", "lighter", "flashlight", "battery", "generator", "motor", "wheel", "gear", "screw", "nail", "bolt", "nut", "washer", "spring", "chain", "belt", "pulley", "lever", "button", "switch", "sensor", "detector", "alarm", "safe", "vault", "door", "gate", "fence", "wall", "floor", "ceiling", "roof", "window", "glass", "mirror", "frame", "picture", "painting", "statue", "bust", "urn", "coffin", "sarcophagus", "shelf", "cabinet", "drawer", "chest", "trunk", "bag", "backpack", "pouch", "purse", "wallet", "money", "cash", "check", "receipt", "ticket", "passport", "id", "badge", "medal", "trophy", "cup", "plate", "bowl", "fork", "spoon", "knife", "cup", "glass", "bottle", "jug", "pitcher", "kettle", "pot", "pan", "tray", "basket", "bucket", "barrel", "crate", "box", "chest", "trunk", "bag", "sack", "package", "parcel", "envelope", "letter", "note", "book", "magazine", "newspaper", "map", "blueprint", "diagram", "schematic", "plan", "drawing", "sketch", "photo", "picture", "poster", "sign", "billboard", "notice", "warning", "instruction", "manual", "guide", "catalog", "brochure", "flyer", "pamphlet", "leaflet"}
-_G.sJ_Global = {"wall", "floor", "ceiling", "hinge", "frame", "window", "furniture", "carfurniture", "puzzle", "bookshelf", "shelf", "closet", "cabinet", "drawer"} -- kept but not used much
+-- ITEM KEYWORDS (actual items/collectibles)
+_G.iK_Global = {"key", "padlock", "hammer", "cog", "shotgun", "weapon", "gasoline", "fuel", "battery", "spark", "crank", "book", "teddy", "plank", "fuse", "melon", "pliers", "cutting", "crossbow", "arrow", "bolt", "wrench", "screwdriver", "meat", "crowbar", "winch", "handle", "valve", "remote", "card", "code", "ticket", "coin", "tool", "item", "gun", "ammo", "ruby", "diamond", "emerald", "sapphire", "topaz", "gem", "crystal", "jewel", "gold", "silver", "bronze", "copper", "iron", "steel", "glass", "wood", "stone", "brick", "clay", "rope", "wire", "chain", "lock", "box", "crate", "barrel", "vase", "pot", "pan", "knife", "sword", "axe", "pickaxe", "shovel", "hoe", "scythe", "wand", "staff", "bow", "arrow", "bullet", "shell", "bomb", "grenade", "mine", "trap", "camera", "phone", "radio", "map", "compass", "lighter", "flashlight", "battery", "generator", "motor", "wheel", "gear", "screw", "nail", "bolt", "nut", "washer", "spring", "chain", "belt", "pulley", "lever", "button", "switch", "sensor", "detector", "alarm", "safe", "vault", "chest", "trunk", "bag", "backpack", "pouch", "purse", "wallet", "money", "cash", "check", "receipt", "ticket", "passport", "id", "badge", "medal", "trophy", "cup", "plate", "bowl", "fork", "spoon", "knife", "cup", "glass", "bottle", "jug", "pitcher", "kettle", "pot", "pan", "tray", "basket", "bucket", "barrel", "crate", "box", "chest", "trunk", "bag", "sack", "package", "parcel", "envelope", "letter", "note", "book", "magazine", "newspaper", "map", "blueprint", "diagram", "schematic", "plan", "drawing", "sketch", "photo", "picture", "poster", "sign", "billboard", "notice", "warning", "instruction", "manual", "guide", "catalog", "brochure", "flyer", "pamphlet", "leaflet", "redwire", "wire", "panel", "wallpanel", "mug", "cup", "bottle", "can"}
+
+-- STRUCTURE BLACKLIST - these will NEVER show as items (doors, frames, walls, etc.)
+_G.structureBlacklist = {"door", "frame", "wall", "floor", "ceiling", "vent", "slider", "panel", "window", "gate", "fence", "roof", "stair", "step", "railing", "pillar", "column", "beam", "girder", "truss", "scaffold", "platform", "ramp", "elevator", "ladder", "ventframe", "wallpanel", "frames", "slider", "vent", "floor1", "floor2", "floor3", "wall1", "wall2", "wall3"}
 
 _G.isObjectAnItem = function(obj)
     if not obj or not obj.Parent then return false end
+    
+    -- Ignore player characters
+    if Players:GetPlayerFromCharacter(obj) then
+        return false
+    end
+    
     local nameLower = string.lower(obj.Name)
-    local pNameLower = obj.Parent and string.lower(obj.Parent.Name) or ""
     
-    if string.find(nameLower, "wheel") then return false end
-    for _, junk in pairs(_G.sJ_Global) do 
-        if string.find(nameLower, junk) or string.find(pNameLower, junk) then return false end 
+    -- Check if it's a structure (door, frame, wall, etc.)
+    for _, junk in pairs(_G.structureBlacklist) do
+        if string.find(nameLower, junk) then
+            return false
+        end
     end
     
-    local isEscapeObject = string.find(nameLower, "door") or string.find(nameLower, "gate") or string.find(nameLower, "escape") or string.find(nameLower, "car") or string.find(nameLower, "boat") or string.find(nameLower, "helicopter")
-    if string.find(nameLower, "battery") or string.find(nameLower, "spark") then return true end
-    
-    if not isEscapeObject then
-        if obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true) then return true end
-        for _, kw in pairs(_G.iK_Global) do if string.find(nameLower, kw) then return true end end
+    -- Check if it has a ClickDetector or ProximityPrompt with a "Take/Pick up" type prompt
+    local hasPrompt = false
+    for _, prompt in pairs(obj:GetDescendants()) do
+        if prompt:IsA("ProximityPrompt") or prompt:IsA("ClickDetector") then
+            hasPrompt = true
+            -- If it has a ProximityPrompt, check if it's a "Take" or "Pick up" type
+            if prompt:IsA("ProximityPrompt") then
+                local actionText = prompt.ActionText or ""
+                local nameText = prompt.Name or ""
+                local lowerAction = string.lower(actionText)
+                local lowerName = string.lower(nameText)
+                -- Only count it as an item if the prompt is for taking/picking up
+                if string.find(lowerAction, "take") or string.find(lowerAction, "pick") or 
+                   string.find(lowerAction, "collect") or string.find(lowerAction, "grab") or
+                   string.find(lowerName, "take") or string.find(lowerName, "pick") then
+                    hasPrompt = true
+                else
+                    -- If it's a "Open" or "Close" prompt, it's a door/structure
+                    if string.find(lowerAction, "open") or string.find(lowerAction, "close") or
+                       string.find(lowerAction, "use") or string.find(lowerAction, "interact") then
+                        return false
+                    end
+                end
+            else
+                -- ClickDetector - check if it has a "Take" or "Pick" in its name
+                if string.find(string.lower(prompt.Name or ""), "take") or 
+                   string.find(string.lower(prompt.Name or ""), "pick") then
+                    hasPrompt = true
+                else
+                    -- If it's just a generic ClickDetector, check if the parent name contains item keywords
+                    local parentLower = string.lower(obj.Name)
+                    for _, kw in pairs(_G.iK_Global) do
+                        if string.find(parentLower, kw) then
+                            hasPrompt = true
+                            break
+                        end
+                    end
+                end
+            end
+            break
+        end
     end
+    
+    if hasPrompt then return true end
+    
+    -- Check if name contains any item keyword (last resort)
+    for _, kw in pairs(_G.iK_Global) do
+        if string.find(nameLower, kw) then
+            return true
+        end
+    end
+    
     return false
 end
 
@@ -129,7 +183,9 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+                    -- Skip player characters entirely
+                    if Players:GetPlayerFromCharacter(obj) then
+                        -- Still apply player ESP if enabled
                         if shared.CheatConfig.PlayersESP then
                             local player = Players:GetPlayerFromCharacter(obj)
                             applyPlayersESP(obj, player and (player.DisplayName or player.Name) or "Bot")
@@ -137,36 +193,11 @@ task.spawn(function()
                             if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
                             if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
                         end
+                        continue
                     end
                     
-                    -- FIXED ITEM ESP - Shows ALL items with ClickDetector/ProximityPrompt OR matching keywords
-                    local isItem = false
-                    -- Check if the model itself has a ClickDetector or ProximityPrompt anywhere in its descendants
-                    local hasPrompt = obj:FindFirstChildWhichIsA("ClickDetector", true) or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                    if hasPrompt then
-                        isItem = true
-                    else
-                        -- Check if name matches any keyword
-                        local nameLower = string.lower(obj.Name)
-                        for _, kw in pairs(_G.iK_Global) do
-                            if string.find(nameLower, kw) then
-                                isItem = true
-                                break
-                            end
-                        end
-                    end
-                    
-                    -- Also check if any child part has a ClickDetector (sometimes the detector is on a part, not the model)
-                    if not isItem then
-                        for _, child in pairs(obj:GetDescendants()) do
-                            if child:IsA("BasePart") and (child:FindFirstChildWhichIsA("ClickDetector", true) or child:FindFirstChildWhichIsA("ProximityPrompt", true)) then
-                                isItem = true
-                                break
-                            end
-                        end
-                    end
-                    
-                    if isItem then
+                    -- ITEM ESP - ONLY actual items (filters out players, doors, frames)
+                    if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
                         if shared.CheatConfig.ItemsESP then
                             local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
                             if targetPart then
@@ -358,16 +389,30 @@ _G.updateMenuDisplay = function()
             local currentQuery = string.lower(_G.SearchQuery)
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if (obj:IsA("BasePart") or obj:IsA("Model")) and obj.Parent and not obj:IsDescendantOf(LocalPlayer.Character) then
+                    -- Skip player characters
+                    if Players:GetPlayerFromCharacter(obj) then
+                        continue
+                    end
                     if _G.isObjectAnItem and _G.isObjectAnItem(obj) then
                         local current = obj
-                        while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") and not string.find(string.lower(current.Parent.Name), "item") and not string.find(string.lower(current.Parent.Name), "spawn") do current = current.Parent end
-                        local customButtonName = current.Name local nameLower = string.lower(customButtonName)
+                        while current.Parent and current.Parent ~= Workspace and current.Parent:IsA("Model") do
+                            current = current.Parent
+                        end
+                        local customButtonName = current.Name
+                        local nameLower = string.lower(customButtonName)
                         if currentQuery == "" or string.find(nameLower, currentQuery) then
-                            if not ad[customButtonName] and not Players:GetPlayerFromCharacter(current) then
+                            if not ad[customButtonName] then
                                 ad[customButtonName] = true te = te + 1
                                 local eB = Instance.new("TextButton", SF) eB.BackgroundColor3, eB.Size, eB.Font, eB.Text, eB.TextColor3, eB.TextSize, eB.TextXAlignment = Color3.fromRGB(45, 45, 50), UDim2.new(1, 0, 0, 32), Enum.Font.SourceSans, "  " .. customButtonName, Color3.fromRGB(255, 255, 255), 14, Enum.TextXAlignment.Left
                                 Instance.new("UICorner", eB).CornerRadius = UDim.new(0, 4)
-                                eB.MouseButton1Click:Connect(function() pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = (current:IsA("Model") and (current.PrimaryPart and current.PrimaryPart.CFrame or current:FindFirstChildWhichIsA("BasePart", true).CFrame) or current.CFrame) + Vector3.new(0, 3.5, 0) end) end)
+                                eB.MouseButton1Click:Connect(function()
+                                    pcall(function()
+                                        local targetPart = current:IsA("Model") and (current.PrimaryPart or current:FindFirstChildWhichIsA("BasePart", true))
+                                        if targetPart then
+                                            LocalPlayer.Character.HumanoidRootPart.CFrame = targetPart.CFrame + Vector3.new(0, 3.5, 0)
+                                        end
+                                    end)
+                                end)
                             end
                         end
                     end
@@ -387,7 +432,7 @@ MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputTyp
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
--- part 6 - FIXED FLY (Completely still, no running/falling animations)
+-- part 6 - FLY (PERFECT - DO NOT TOUCH)
 local flySpeed = 30
 local flyConnection = nil
 
@@ -398,13 +443,12 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
 
-    -- FREEZE EVERYTHING - completely still
     hum.PlatformStand = true
     hum.AutoRotate = false
     hum.WalkSpeed = 0
     hum.JumpPower = 0
     hum.HipHeight = 0
-    hum:ChangeState(Enum.HumanoidStateType.Physics)  -- kills all animations
+    hum:ChangeState(Enum.HumanoidStateType.Physics)
     Workspace.Gravity = 0
 
     if flyConnection then flyConnection:Disconnect() end
@@ -415,14 +459,12 @@ local function startFly()
             return
         end
 
-        -- Refresh character in case of respawn
         local currentChar = LocalPlayer.Character
         if not currentChar then return end
         local currentHrp = currentChar:FindFirstChild("HumanoidRootPart")
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
 
-        -- Keep everything frozen
         currentHum.PlatformStand = true
         currentHum.AutoRotate = false
         currentHum.WalkSpeed = 0
@@ -447,7 +489,6 @@ local function startFly()
             currentHrp.Velocity = Vector3.new(0, 0, 0)
         end
 
-        -- Rotate character to face camera (full 3D)
         local lookDir = lookVec
         if lookDir.Magnitude > 0 then
             currentHrp.CFrame = CFrame.lookAt(currentHrp.Position, currentHrp.Position + lookDir, Vector3.new(0, 1, 0))
