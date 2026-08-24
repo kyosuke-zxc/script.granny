@@ -87,22 +87,32 @@ local function toggleThirdPerson(enable)
     end)
 end
 
+-- ========== GRANNY DETECTION (same as before) ==========
+local function isPlayerGranny(p)
+    if not p.Character then return false end
+    local nL = string.lower(p.Name)
+    local isGranny = string.find(nL, "granny") or 
+                     (p.Team and string.find(string.lower(p.Team.Name), "granny")) or 
+                     (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
+    return isGranny
+end
+
 local function getRandomAlly()
     local allies = {}
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local nL = string.lower(p.Name)
-            local isGranny = string.find(nL, "granny") or (p.Team and string.find(string.lower(p.Team.Name), "granny")) or (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
-            if not isGranny then table.insert(allies, p.Character.HumanoidRootPart) end
+            if not isPlayerGranny(p) then
+                table.insert(allies, p.Character.HumanoidRootPart)
+            end
         end
     end
     return #allies > 0 and allies[math.random(1, #allies)] or nil
 end
 
 -- ================================================
--- PLAYER ESP - NO SELF, PLAYER NAME or "Bot"
+-- PLAYER ESP - NOW WITH GRANNY DETECTION
 -- ================================================
-local function applyPlayersESP(targetFrame, customName, isBot)
+local function applyPlayersESP(targetFrame, customName, isEnemy)
     if not targetFrame or not targetFrame.Parent then return end
     local espName = "UniversalWhiteESP"
     if not shared.CheatConfig.PlayersESP then
@@ -111,12 +121,9 @@ local function applyPlayersESP(targetFrame, customName, isBot)
         return
     end
     
-    -- Determine color: red for enemies/bots, green for others
-    local isKiller = isBot or targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
-    local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
-    
-    -- Label: if it's a bot → "Bot", otherwise use customName (player name)
-    local displayName = isBot and "Bot" or customName
+    -- Red for enemies (Granny players or bots), green for allies
+    local espColor = isEnemy and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
+    local displayName = customName
 
     if not targetFrame:FindFirstChild(espName) then
         local hl = Instance.new("Highlight", targetFrame)
@@ -153,13 +160,14 @@ local function applyPlayersESP(targetFrame, customName, isBot)
     end
 end
 
--- Watch players (skip local player)
+-- Watch players (skip local)
 local function watchPlayer(p)
     if p == LocalPlayer then return end
     p.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         if shared.CheatConfig.PlayersESP then
-            applyPlayersESP(char, p.DisplayName or p.Name, false)
+            local isEnemy = isPlayerGranny(p)
+            applyPlayersESP(char, p.DisplayName or p.Name, isEnemy)
         end
     end)
 end
@@ -219,11 +227,13 @@ local function removeItemESP(obj)
     end
 end
 
--- SCAN LOOP (every 2 seconds)
+-- ================================================
+-- SCAN LOOP - DETECTS PLAYERS (with Granny check) + BOTS + ITEMS
+-- ================================================
 task.spawn(function()
     while task.wait(2) do
         if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
-            -- Cleanup everything
+            -- Cleanup
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                     if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
@@ -241,7 +251,8 @@ task.spawn(function()
                     local player = Players:GetPlayerFromCharacter(obj)
                     if player and player ~= LocalPlayer then
                         if shared.CheatConfig.PlayersESP then
-                            applyPlayersESP(obj, player.DisplayName or player.Name, false)
+                            local isEnemy = isPlayerGranny(player)
+                            applyPlayersESP(obj, player.DisplayName or player.Name, isEnemy)
                         else
                             if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
                             if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
@@ -250,11 +261,13 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- 2) Check if it's a bot / NPC with "granny" or "enemy" in name
-                    local objName = string.lower(obj.Name)
-                    local isBot = string.find(objName, "granny") or string.find(objName, "enemy") or string.find(objName, "grandpa")
-                    if isBot and shared.CheatConfig.PlayersESP then
-                        applyPlayersESP(obj, "Granny", true)   -- true = isBot → will show "Bot"
+                    -- 2) Check if it's a BOT / NPC (has a Humanoid and is NOT a player)
+                    local humanoid = obj:FindFirstChildOfClass("Humanoid")
+                    if humanoid and not Players:GetPlayerFromCharacter(obj) then
+                        if shared.CheatConfig.PlayersESP then
+                            applyPlayersESP(obj, "Bot", true)   -- true = enemy (red)
+                        end
+                        removeItemESP(obj)
                         continue
                     end
                     
@@ -270,7 +283,7 @@ task.spawn(function()
     end
 end)
 
--- part 3 (Anti-Kill trap etc.)
+-- part 3 (Anti-Kill trap etc.) - unchanged
 task.spawn(function()
     while task.wait(0.1) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
