@@ -8,7 +8,14 @@ local UserInputService = game:GetService("UserInputService")
 
 if CoreGui:FindFirstChild("GrannyPremiumClean") then CoreGui["GrannyPremiumClean"]:Destroy() end
 
-shared.CheatConfig = shared.CheatConfig or { PlayersESP = false, ThirdPerson = false, AntiKillTrap = false, Fly = false, Noclip = false, ItemsESP = false }
+shared.CheatConfig = shared.CheatConfig or { 
+    PlayersESP = false, 
+    ThirdPerson = false, 
+    AntiKillTrap = false, 
+    Fly = false, 
+    Noclip = false, 
+    ItemsESP = false 
+}
 
 -- ========== CUSTOMIZE YOUR ITEMS HERE ==========
 _G.ItemWhitelist = {
@@ -29,7 +36,6 @@ _G.StructureBlacklist = {
     "Rope", "Winch", "Plank puzzle", "Plank gate"
 }
 
--- Cache for item detection
 local ItemCache = {}
 local ItemCacheTime = 0
 
@@ -110,7 +116,7 @@ local function getRandomAlly()
 end
 
 -- ================================================
--- PLAYER ESP - ONLY FOR REAL PLAYERS
+-- PLAYER ESP
 -- ================================================
 local function applyPlayersESP(targetFrame, customName, isEnemy)
     if not targetFrame or not targetFrame.Parent then return end
@@ -227,7 +233,7 @@ local function removeItemESP(obj)
 end
 
 -- ================================================
--- SCAN LOOP - ONLY PLAYERS + ITEMS (NO BOT DETECTION)
+-- SCAN LOOP - ONLY PLAYERS + ITEMS (NO BOTS)
 -- ================================================
 task.spawn(function()
     while task.wait(2) do
@@ -245,7 +251,7 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    -- 1) Check if it's a player (skip local)
+                    -- 1) Player ESP (skip local)
                     local player = Players:GetPlayerFromCharacter(obj)
                     if player and player ~= LocalPlayer then
                         if shared.CheatConfig.PlayersESP then
@@ -308,7 +314,7 @@ task.spawn(function()
     end
 end)
 
--- GUI (unchanged)
+-- GUI
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 local MainFrame = Instance.new("Frame", ScreenGui)
