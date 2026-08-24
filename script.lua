@@ -87,7 +87,7 @@ local function toggleThirdPerson(enable)
     end)
 end
 
--- ========== GRANNY DETECTION (same as before) ==========
+-- ========== GRANNY DETECTION ==========
 local function isPlayerGranny(p)
     if not p.Character then return false end
     local nL = string.lower(p.Name)
@@ -110,7 +110,7 @@ local function getRandomAlly()
 end
 
 -- ================================================
--- PLAYER ESP - NOW WITH GRANNY DETECTION
+-- PLAYER ESP - ONLY FOR REAL PLAYERS
 -- ================================================
 local function applyPlayersESP(targetFrame, customName, isEnemy)
     if not targetFrame or not targetFrame.Parent then return end
@@ -121,7 +121,6 @@ local function applyPlayersESP(targetFrame, customName, isEnemy)
         return
     end
     
-    -- Red for enemies (Granny players or bots), green for allies
     local espColor = isEnemy and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
     local displayName = customName
 
@@ -176,7 +175,7 @@ Players.PlayerAdded:Connect(function(p)
     if p ~= LocalPlayer then watchPlayer(p) end
 end)
 
--- ITEM ESP (Highlight + Name Label)
+-- ITEM ESP
 local function applyItemESP(obj)
     if not obj then return end
     if obj:IsDescendantOf(LocalPlayer.Character) then return end
@@ -228,12 +227,11 @@ local function removeItemESP(obj)
 end
 
 -- ================================================
--- SCAN LOOP - DETECTS PLAYERS (with Granny check) + BOTS + ITEMS
+-- SCAN LOOP - ONLY PLAYERS + ITEMS (NO BOT DETECTION)
 -- ================================================
 task.spawn(function()
     while task.wait(2) do
         if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
-            -- Cleanup
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                     if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
@@ -261,17 +259,7 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- 2) Check if it's a BOT / NPC (has a Humanoid and is NOT a player)
-                    local humanoid = obj:FindFirstChildOfClass("Humanoid")
-                    if humanoid and not Players:GetPlayerFromCharacter(obj) then
-                        if shared.CheatConfig.PlayersESP then
-                            applyPlayersESP(obj, "Bot", true)   -- true = enemy (red)
-                        end
-                        removeItemESP(obj)
-                        continue
-                    end
-                    
-                    -- 3) Item ESP
+                    -- 2) Item ESP (only if NOT a player)
                     if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
                         applyItemESP(obj)
                     else
@@ -283,7 +271,7 @@ task.spawn(function()
     end
 end)
 
--- part 3 (Anti-Kill trap etc.) - unchanged
+-- part 3 (Anti-Kill trap etc.)
 task.spawn(function()
     while task.wait(0.1) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
