@@ -98,8 +98,11 @@ local function getRandomAlly()
     end
     return #allies > 0 and allies[math.random(1, #allies)] or nil
 end
--- part 2
-local function applyPlayersESP(targetFrame, customName)
+
+-- ================================================
+-- PLAYER ESP - NO SELF, PLAYER NAME or "Bot"
+-- ================================================
+local function applyPlayersESP(targetFrame, customName, isBot)
     if not targetFrame or not targetFrame.Parent then return end
     local espName = "UniversalWhiteESP"
     if not shared.CheatConfig.PlayersESP then
@@ -108,9 +111,12 @@ local function applyPlayersESP(targetFrame, customName)
         return
     end
     
-    local isKiller = targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(customName), "bot") or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
+    -- Determine color: red for enemies/bots, green for others
+    local isKiller = isBot or targetFrame:FindFirstChild("Hitbox") ~= nil or string.find(string.lower(targetFrame.Name), "granny") or string.find(string.lower(targetFrame.Name), "enemy") or string.find(string.lower(targetFrame.Name), "grandpa")
     local espColor = isKiller and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(40, 255, 100)
-    local displayName = customName
+    
+    -- Label: if it's a bot → "Bot", otherwise use customName (player name)
+    local displayName = isBot and "Bot" or customName
 
     if not targetFrame:FindFirstChild(espName) then
         local hl = Instance.new("Highlight", targetFrame)
@@ -147,21 +153,26 @@ local function applyPlayersESP(targetFrame, customName)
     end
 end
 
+-- Watch players (skip local player)
 local function watchPlayer(p)
+    if p == LocalPlayer then return end
     p.CharacterAdded:Connect(function(char)
         task.wait(0.5)
-        if shared.CheatConfig.PlayersESP then applyPlayersESP(char, p.DisplayName or p.Name) end
+        if shared.CheatConfig.PlayersESP then
+            applyPlayersESP(char, p.DisplayName or p.Name, false)
+        end
     end)
 end
 for _, p in pairs(Players:GetPlayers()) do watchPlayer(p) end
-Players.PlayerAdded:Connect(watchPlayer)
+Players.PlayerAdded:Connect(function(p)
+    if p ~= LocalPlayer then watchPlayer(p) end
+end)
 
--- ITEM ESP FUNCTION (Highlight + Name Label)
+-- ITEM ESP (Highlight + Name Label)
 local function applyItemESP(obj)
     if not obj then return end
-    if obj:IsDescendantOf(LocalPlayer.Character) then return end -- SKIP HELD ITEMS
+    if obj:IsDescendantOf(LocalPlayer.Character) then return end
     
-    -- Highlight
     local hl = obj:FindFirstChild("UniversalWhiteItemESP")
     if not hl then
         hl = Instance.new("Highlight", obj)
@@ -172,7 +183,6 @@ local function applyItemESP(obj)
         hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     end
     
-    -- Billboard label with name
     local bgui = obj:FindFirstChild("UniversalWhiteItemESPText")
     if not bgui then
         local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
@@ -201,7 +211,6 @@ local function removeItemESP(obj)
     if hl then hl:Destroy() end
     local bgui = obj:FindFirstChild("UniversalWhiteItemESPText")
     if bgui then bgui:Destroy() end
-    -- Also check descendants for BillboardGui on parts
     for _, part in pairs(obj:GetDescendants()) do
         if part:IsA("BasePart") then
             local bg = part:FindFirstChild("UniversalWhiteItemESPText")
@@ -210,11 +219,11 @@ local function removeItemESP(obj)
     end
 end
 
--- OPTIMIZED SCAN LOOP
+-- SCAN LOOP (every 2 seconds)
 task.spawn(function()
     while task.wait(2) do
         if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
-            -- Cleanup everything if both off
+            -- Cleanup everything
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                     if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
@@ -228,19 +237,28 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    if Players:GetPlayerFromCharacter(obj) then
+                    -- 1) Check if it's a player (skip local)
+                    local player = Players:GetPlayerFromCharacter(obj)
+                    if player and player ~= LocalPlayer then
                         if shared.CheatConfig.PlayersESP then
-                            local player = Players:GetPlayerFromCharacter(obj)
-                            applyPlayersESP(obj, player and (player.DisplayName or player.Name) or "Bot")
+                            applyPlayersESP(obj, player.DisplayName or player.Name, false)
                         else
                             if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
                             if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
                         end
-                        removeItemESP(obj)  -- Remove any item ESP from players
+                        removeItemESP(obj)
                         continue
                     end
                     
-                    -- Item ESP - skip if held by player
+                    -- 2) Check if it's a bot / NPC with "granny" or "enemy" in name
+                    local objName = string.lower(obj.Name)
+                    local isBot = string.find(objName, "granny") or string.find(objName, "enemy") or string.find(objName, "grandpa")
+                    if isBot and shared.CheatConfig.PlayersESP then
+                        applyPlayersESP(obj, "Granny", true)   -- true = isBot → will show "Bot"
+                        continue
+                    end
+                    
+                    -- 3) Item ESP
                     if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
                         applyItemESP(obj)
                     else
@@ -251,7 +269,8 @@ task.spawn(function()
         end)
     end
 end)
--- part 3
+
+-- part 3 (Anti-Kill trap etc.)
 task.spawn(function()
     while task.wait(0.1) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -288,12 +307,13 @@ task.spawn(function()
     end
 end)
 
+-- GUI (unchanged)
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
--- part 4
+
 local function createTab(name, text, posX)
     local btn = Instance.new("TextButton", MainFrame)
     btn.Name, btn.Text, btn.Position, btn.Size, btn.BackgroundColor3, btn.Font, btn.TextColor3, btn.TextSize = name, text, UDim2.new(posX, 0, 0.03, 0), UDim2.new(0.29, 0, 0, 35), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, Color3.fromRGB(200, 200, 200), 12
@@ -321,7 +341,6 @@ local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
--- Movement Controls Frame (Fly & Noclip only)
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
@@ -365,7 +384,7 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     ItemsBtn.MouseButton1Click:Connect(function() _G.cS = "Items" ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3, EscBtn.TextColor3, EscBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
     EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
--- part 5
+
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end end
     local ad, te = {}, 0
@@ -454,7 +473,6 @@ local function startFly()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
 
-    -- Force camera to follow HRP perfectly
     if shared.CheatConfig.ThirdPerson then
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
         LocalPlayer.CameraMaxZoomDistance = 35
@@ -483,7 +501,6 @@ local function startFly()
         local currentHum = currentChar:FindFirstChildOfClass("Humanoid")
         if not currentHrp or not currentHum then return end
 
-        -- Freeze
         currentHum.PlatformStand = true
         currentHum.AutoRotate = false
         currentHum.WalkSpeed = 0
