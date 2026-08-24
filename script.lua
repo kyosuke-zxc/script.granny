@@ -14,7 +14,8 @@ shared.CheatConfig = shared.CheatConfig or {
     AntiKillTrap = false, 
     Fly = false, 
     Noclip = false, 
-    ItemsESP = false 
+    ItemsESP = false,
+    GrannyESP = false   -- NEW!
 }
 
 -- ========== CUSTOMIZE YOUR ITEMS HERE ==========
@@ -93,7 +94,7 @@ local function toggleThirdPerson(enable)
     end)
 end
 
--- ========== GRANNY DETECTION ==========
+-- ========== GRANNY DETECTION (for players) ==========
 local function isPlayerGranny(p)
     if not p.Character then return false end
     local nL = string.lower(p.Name)
@@ -181,7 +182,52 @@ Players.PlayerAdded:Connect(function(p)
     if p ~= LocalPlayer then watchPlayer(p) end
 end)
 
+-- ================================================
+-- GRANNY NPC ESP
+-- ================================================
+local function applyGrannyESP(obj)
+    if not obj or not shared.CheatConfig.GrannyESP then
+        if obj and obj:FindFirstChild("GrannyESP_Highlight") then obj["GrannyESP_Highlight"]:Destroy() end
+        if obj and obj:FindFirstChild("GrannyESP_Text") then obj["GrannyESP_Text"]:Destroy() end
+        return
+    end
+    
+    if not obj:FindFirstChild("GrannyESP_Highlight") then
+        local hl = Instance.new("Highlight", obj)
+        hl.Name = "GrannyESP_Highlight"
+        hl.FillColor = Color3.fromRGB(255, 0, 0)
+        hl.FillTransparency = 0.4
+        hl.OutlineColor = Color3.fromRGB(255, 0, 0)
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    end
+    
+    if not obj:FindFirstChild("GrannyESP_Text") then
+        local bgui = Instance.new("BillboardGui", obj)
+        bgui.Name = "GrannyESP_Text"
+        bgui.Size = UDim2.new(0, 120, 0, 30)
+        bgui.StudsOffset = Vector3.new(0, 3.5, 0)
+        bgui.AlwaysOnTop = true
+        local label = Instance.new("TextLabel", bgui)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = "🧟 Granny"
+        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        label.TextStrokeTransparency = 0
+        label.Font = Enum.Font.SourceSansBold
+        label.TextSize = 14
+        label.Parent = bgui
+        bgui.Parent = obj
+    end
+end
+
+local function removeGrannyESP(obj)
+    if obj:FindFirstChild("GrannyESP_Highlight") then obj["GrannyESP_Highlight"]:Destroy() end
+    if obj:FindFirstChild("GrannyESP_Text") then obj["GrannyESP_Text"]:Destroy() end
+end
+
+-- ================================================
 -- ITEM ESP
+-- ================================================
 local function applyItemESP(obj)
     if not obj then return end
     if obj:IsDescendantOf(LocalPlayer.Character) then return end
@@ -220,10 +266,8 @@ local function applyItemESP(obj)
 end
 
 local function removeItemESP(obj)
-    local hl = obj:FindFirstChild("UniversalWhiteItemESP")
-    if hl then hl:Destroy() end
-    local bgui = obj:FindFirstChild("UniversalWhiteItemESPText")
-    if bgui then bgui:Destroy() end
+    if obj:FindFirstChild("UniversalWhiteItemESP") then obj["UniversalWhiteItemESP"]:Destroy() end
+    if obj:FindFirstChild("UniversalWhiteItemESPText") then obj["UniversalWhiteItemESPText"]:Destroy() end
     for _, part in pairs(obj:GetDescendants()) do
         if part:IsA("BasePart") then
             local bg = part:FindFirstChild("UniversalWhiteItemESPText")
@@ -233,16 +277,17 @@ local function removeItemESP(obj)
 end
 
 -- ================================================
--- SCAN LOOP - ONLY PLAYERS + ITEMS (NO BOTS)
+-- SCAN LOOP - PLAYERS + ITEMS + GRANNY NPC
 -- ================================================
 task.spawn(function()
     while task.wait(2) do
-        if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP then
+        if not shared.CheatConfig.PlayersESP and not shared.CheatConfig.ItemsESP and not shared.CheatConfig.GrannyESP then
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
                     if obj:FindFirstChild("UniversalWhiteESP") then obj["UniversalWhiteESP"]:Destroy() end
                     if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
                     removeItemESP(obj)
+                    removeGrannyESP(obj)
                 end
             end
             continue
@@ -251,7 +296,7 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    -- 1) Player ESP (skip local)
+                    -- 1) Player ESP
                     local player = Players:GetPlayerFromCharacter(obj)
                     if player and player ~= LocalPlayer then
                         if shared.CheatConfig.PlayersESP then
@@ -262,14 +307,33 @@ task.spawn(function()
                             if obj:FindFirstChild("UniversalWhiteESPText") then obj["UniversalWhiteESPText"]:Destroy() end
                         end
                         removeItemESP(obj)
+                        removeGrannyESP(obj)
                         continue
                     end
                     
-                    -- 2) Item ESP (only if NOT a player)
+                    -- 2) GRANNY NPC (only if not a player)
+                    local nameLower = string.lower(obj.Name)
+                    local isGrannyNPC = string.find(nameLower, "granny") or string.find(nameLower, "enemy") or string.find(nameLower, "grandpa")
+                    if isGrannyNPC and not Players:GetPlayerFromCharacter(obj) then
+                        if shared.CheatConfig.GrannyESP then
+                            applyGrannyESP(obj)
+                        else
+                            removeGrannyESP(obj)
+                        end
+                        removeItemESP(obj)
+                        continue
+                    end
+                    
+                    -- 3) Item ESP
                     if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
                         applyItemESP(obj)
                     else
                         removeItemESP(obj)
+                    end
+                    
+                    -- Clean up Granny ESP if not a Granny NPC
+                    if not isGrannyNPC then
+                        removeGrannyESP(obj)
                     end
                 end
             end
@@ -407,8 +471,10 @@ _G.updateMenuDisplay = function()
         end
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP _G.updateMenuDisplay() end)
+        -- NEW: ESP Granny button
+        makeVis(shared.CheatConfig.GrannyESP and "ESP Granny: ON" or "ESP Granny: OFF", shared.CheatConfig.GrannyESP, function() shared.CheatConfig.GrannyESP = not shared.CheatConfig.GrannyESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
-        SF.CanvasSize = UDim2.new(0, 0, 0, 130) return
+        SF.CanvasSize = UDim2.new(0, 0, 0, 160) return
     elseif _G.cM == "Granny" then
         SubNavFrame.Visible, SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible, SF.Position, SF.Size = false, false, false, false, true, UDim2.new(0.05, 0, 0.15, 0), UDim2.new(0.9, 0, 0, 235)
         for _, p in pairs(Players:GetPlayers()) do
