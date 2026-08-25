@@ -33,264 +33,76 @@ _G.EscapeItems = {
     ["Cemetery_Gate"] = {"Gate Key"}
 }
 
--- ========== CHAIN ITEMS FOR ALL LOCATIONS ==========
+-- ========== CHAIN ITEMS ==========
 _G.ChainItems = {
     ["House1"] = {
-        {
-            Target = "Padlock Key",
-            Requires = {"Screwdriver"},
-            Location = "Behind the screwed metal sheet"
-        },
-        {
-            Target = "Screwdriver",
-            Requires = {"Safe Key"},
-            Location = "Basement - Inside the safe"
-        },
-        {
-            Target = "Safe Key",
-            Requires = {},
-            Location = "Kitchen - Inside the microwave"
-        },
-        {
-            Target = "Master Key",
-            Requires = {"Playhouse Key"},
-            Location = "Inside the playhouse"
-        },
-        {
-            Target = "Playhouse Key",
-            Requires = {},
-            Location = "Outside area - Inside the well"
-        }
+        {Target = "Padlock Key", Requires = {"Screwdriver"}},
+        {Target = "Screwdriver", Requires = {"Safe Key"}},
+        {Target = "Safe Key", Requires = {}},
+        {Target = "Master Key", Requires = {"Playhouse Key"}},
+        {Target = "Playhouse Key", Requires = {}}
     },
     ["House2"] = {
-        {
-            Target = "Door Handle",
-            Requires = {"Security Key"},
-            Location = "Security room top floor, Chained box"
-        },
-        {
-            Target = "Cutting Pliers",
-            Requires = {"Safe Key"},
-            Location = "Closet room next to the front door, inside the safe"
-        },
-        {
-            Target = "Safe Key",
-            Requires = {},
-            Location = "Security Room - Top of drawer next to the monitors"
-        },
-        {
-            Target = "Security Key",
-            Requires = {},
-            Location = "Kitchen - One of the cabinets"
-        },
-        {
-            Target = "Padlock Key",
-            Requires = {},
-            Location = "Outside, sealed box"
-        },
-        {
-            Target = "Hand Wheel",
-            Requires = {},
-            Location = "Sealed box in the balcony"
-        },
-        {
-            Target = "Gasoline Can",
-            Requires = {},
-            Location = "Sealed box in the basement"
-        },
-        {
-            Target = "Crowbar",
-            Requires = {},
-            Location = "Outside - Pet's cage"
-        }
+        {Target = "Door Handle", Requires = {"Security Key"}},
+        {Target = "Cutting Pliers", Requires = {"Safe Key"}},
+        {Target = "Safe Key", Requires = {}},
+        {Target = "Security Key", Requires = {}},
+        {Target = "Padlock Key", Requires = {}},
+        {Target = "Hand Wheel", Requires = {}},
+        {Target = "Gasoline Can", Requires = {}},
+        {Target = "Crowbar", Requires = {}}
     },
     ["Mansion"] = {
-        {
-            Target = "Fuse",
-            Requires = {"Coconut"},
-            Location = "Inside the coconut - cut using guillotine"
-        },
-        {
-            Target = "Coconut",
-            Requires = {"Safe Key"},
-            Location = "Toilet - Inside the safe"
-        },
-        {
-            Target = "Safe Key",
-            Requires = {},
-            Location = "Rooftop - Inside the bird nest"
-        },
-        {
-            Target = "Generator Cable",
-            Requires = {"Safe Key"},
-            Location = "(B1) - Inside the Pedestal Safe"
-        },
-        {
-            Target = "Bridge Crank",
-            Requires = {},
-            Location = "(F2) Bedroom - On the bed"
-        },
-        {
-            Target = "Ticket",
-            Requires = {},
-            Location = "Basement - Inside the ticket vendor"
-        },
-        {
-            Target = "Train Key",
-            Requires = {},
-            Location = "(F2) - Inside the sealed wooden crate"
-        },
-        {
-            Target = "Accelerator",
-            Requires = {},
-            Location = "(F2) Crib room - After summoning Slendrina"
-        }
+        {Target = "Fuse", Requires = {"Coconut"}},
+        {Target = "Coconut", Requires = {"Safe Key"}},
+        {Target = "Safe Key", Requires = {}},
+        {Target = "Generator Cable", Requires = {"Safe Key"}},
+        {Target = "Bridge Crank", Requires = {}},
+        {Target = "Ticket", Requires = {}},
+        {Target = "Train Key", Requires = {}},
+        {Target = "Accelerator", Requires = {}}
     },
     ["School"] = {
-        {
-            Target = "Security Key",
-            Requires = {"Safe Key"},
-            Location = "Inside the safe in a wall, In front of women's bathroom"
-        },
-        {
-            Target = "Safe Key",
-            Requires = {},
-            Location = "Medical Room - Inside the drawer under a bed"
-        },
-        {
-            Target = "Hand Wheel",
-            Requires = {},
-            Location = "Ceiling on the right side of the door leading to the kitchen"
-        },
-        {
-            Target = "Padlock Key",
-            Requires = {},
-            Location = "Geography Class - Inside a closet or Drawer"
-        },
-        {
-            Target = "Master Key",
-            Requires = {},
-            Location = "Math Class - Inside a drawer"
-        },
-        {
-            Target = "Bus Key",
-            Requires = {},
-            Location = "Cafeteria - Inside a vent between two tables"
-        },
-        {
-            Target = "Bus Steering Wheel",
-            Requires = {},
-            Location = "Boiler Room - Inside the furnace"
-        },
-        {
-            Target = "Gallon",
-            Requires = {},
-            Location = "Outside area - Inside the security booth"
-        },
-        {
-            Target = "Cutting Pliers",
-            Requires = {},
-            Location = "Inside a locker with sticky-notes, between Storage room and men's bathroom"
-        },
-        {
-            Target = "Screwdriver",
-            Requires = {},
-            Location = "Inside a locker with sticky-notes, Near women's bathroom"
-        }
+        {Target = "Security Key", Requires = {"Safe Key"}},
+        {Target = "Safe Key", Requires = {}},
+        {Target = "Hand Wheel", Requires = {}},
+        {Target = "Padlock Key", Requires = {}},
+        {Target = "Master Key", Requires = {}},
+        {Target = "Bus Key", Requires = {}},
+        {Target = "Bus Steering Wheel", Requires = {}},
+        {Target = "Gallon", Requires = {}},
+        {Target = "Cutting Pliers", Requires = {}},
+        {Target = "Screwdriver", Requires = {}}
     },
     ["Ski"] = {
-        {
-            Target = "Remote Control",
-            Requires = {"Safe Key"},
-            Location = "3 - Inside the Safe"
-        },
-        {
-            Target = "Safe Key",
-            Requires = {},
-            Location = "4 - Inside a drawer, Bottom floor"
-        },
-        {
-            Target = "Gear",
-            Requires = {"Chest Key"},
-            Location = "11 - Inside a locked chest near the arcade machines"
-        },
-        {
-            Target = "Chest Key",
-            Requires = {},
-            Location = "5 - Inside the wooden crate"
-        },
-        {
-            Target = "Code",
-            Requires = {},
-            Location = "4 - Stuck to a pillar near the stairs"
-        },
-        {
-            Target = "Padlock Key",
-            Requires = {},
-            Location = "12 - Small prize cabinet inside the wall"
-        },
-        {
-            Target = "Screwdriver",
-            Requires = {},
-            Location = "Room 10's porch - Inside the wooden crate"
-        }
+        {Target = "Remote Control", Requires = {"Safe Key"}},
+        {Target = "Safe Key", Requires = {}},
+        {Target = "Gear", Requires = {"Chest Key"}},
+        {Target = "Chest Key", Requires = {}},
+        {Target = "Code", Requires = {}},
+        {Target = "Padlock Key", Requires = {}},
+        {Target = "Screwdriver", Requires = {}}
     },
     ["Cemetery"] = {
-        {
-            Target = "Gate Key",
-            Requires = {},
-            Location = "2 - Inside the lectern's cabinet"
-        },
-        {
-            Target = "Ruby",
-            Requires = {},
-            Location = "B(B) - Inside the safe"
-        },
-        {
-            Target = "Emerald",
-            Requires = {},
-            Location = "13 - Inside the boarded-up hole"
-        },
-        {
-            Target = "Diamond",
-            Requires = {},
-            Location = "11 - Inside the pipe. On the ground after solving the puzzle"
-        }
+        {Target = "Gate Key", Requires = {}},
+        {Target = "Ruby", Requires = {}},
+        {Target = "Emerald", Requires = {}},
+        {Target = "Diamond", Requires = {}}
     }
 }
 
--- ========== COMPLETE ITEM WHITELIST ==========
+-- ========== ITEM WHITELIST ==========
 _G.ItemWhitelist = {
-    -- Основные предметы
     "Key", "Padlock", "Hammer", "Cog", "Shotgun", "Weapon", "Gasoline", "Fuel",
     "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon", "Crowbar",
     "Wrench", "Screwdriver", "Meat", "Winch handle","Valve", "Remote", "Card", "Code", 
     "Ticket", "Coin", "Tool", "Gun", "Ammo", "Ruby", "Diamond", "Emerald", "Plank",
     "Lock", "Box", "Crate", "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe",
-    "Pickaxe", "Shovel",
-    
-    -- House 1
-    "Safe key", "Car battery", "Master Key", "Cutting Pliers", "Lock Code", 
-    "Car Key", "Gasoline Can", "Playhouse Key",
-    
-    -- House 2
-    "Door handle", "Hand wheel", "Boat key", "Boat Steering Wheel", "Spark Plug",
-    "Security Key", "Crowbar",
-    
-    -- Mansion
-    "Bridge Crank", "Generator Cable", "Train Key", "Accelerator", "Coconut",
-    "Ticket",
-    
-    -- School
-    "Bus Key", "Bus Steering Wheel", "Gallon", "Lock pick",
-    
-    -- Ski Resort
-    "Remote Control", "Gear", "Chest Key",
-    
-    -- Cemetery
-    "Gate Key",
-    
-    -- Дополнительные
+    "Pickaxe", "Shovel", "Safe key", "Car battery", "Master Key", "Cutting Pliers",
+    "Lock Code", "Car Key", "Gasoline Can", "Playhouse Key", "Door handle", "Hand wheel",
+    "Boat key", "Boat Steering Wheel", "Spark Plug", "Security Key", "Bridge Crank",
+    "Generator Cable", "Train Key", "Accelerator", "Coconut", "Bus Key", "Bus Steering Wheel",
+    "Gallon", "Lock pick", "Remote Control", "Gear", "Chest Key", "Gate Key",
     "Engine Part", "Stun Gun", "Stun Gun Ammo", "Shotgun Ammo", "Crossbow",
     "Tranquilizer Dart", "Slingshot", "Stone", "Musket", "Firewood", "Matches",
     "Oil Can", "Silver Key", "Ball", "Shed Key", "Weapon Key", "Bird Seed"
@@ -301,8 +113,7 @@ _G.StructureBlacklist = {
     "Window", "Gate", "Fence", "Roof", "Stair", "Step", "Railing", "Pillar",
     "Column", "Beam", "Girder", "Truss", "Scaffold", "Platform", "Ramp",
     "Elevator", "Ladder", "VentFrame", "WallPanel", "Frames", "Floor1", "Floor2",
-    "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf", "Locked board", 
-    "Rope", "Winch", "Plank puzzle", "Plank gate"
+    "Slider", "Hinge", "Drawer", "Cabinet", "Shelf", "Bookshelf"
 }
 
 local ItemCache = {}
@@ -366,10 +177,9 @@ end
 local function isPlayerGranny(p)
     if not p.Character then return false end
     local nL = string.lower(p.Name)
-    local isGranny = string.find(nL, "granny") or 
-                     (p.Team and string.find(string.lower(p.Team.Name), "granny")) or 
-                     (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
-    return isGranny
+    return string.find(nL, "granny") or 
+           (p.Team and string.find(string.lower(p.Team.Name), "granny")) or 
+           (p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").DisplayName == "Enemy")
 end
 
 local function getRandomAlly()
@@ -407,7 +217,10 @@ local function applyPlayersESP(targetFrame, customName, isEnemy)
         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
         hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     else
-        pcall(function() targetFrame[espName].FillColor = espColor end)
+        pcall(function() 
+            targetFrame[espName].FillColor = espColor
+            targetFrame[espName].OutlineColor = Color3.fromRGB(255, 255, 255)
+        end)
     end
     
     if not targetFrame:FindFirstChild(espName.."Text") then
@@ -451,7 +264,7 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- ================================================
--- GRANNY NPC ESP
+-- GRANNY NPC ESP (shows "Bot")
 -- ================================================
 local function applyGrannyESP(obj)
     if not obj or not shared.CheatConfig.GrannyESP then
@@ -465,7 +278,7 @@ local function applyGrannyESP(obj)
         hl.Name = "GrannyESP_Highlight"
         hl.FillColor = Color3.fromRGB(255, 0, 0)
         hl.FillTransparency = 0.4
-        hl.OutlineColor = Color3.fromRGB(255, 0, 0)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
         hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     end
     
@@ -478,7 +291,7 @@ local function applyGrannyESP(obj)
         local label = Instance.new("TextLabel", bgui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = "Granny"
+        label.Text = "Bot"
         label.TextColor3 = Color3.fromRGB(255, 0, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.SourceSansBold
@@ -612,7 +425,7 @@ local function teleportChainItems(locationKey)
     return totalFound, teleported
 end
 
-local function teleportEscapeItems(locationKey, locationName)
+local function teleportEscapeItems(locationKey)
     local char = LocalPlayer.Character
     if not char then return 0 end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -623,6 +436,8 @@ local function teleportEscapeItems(locationKey, locationName)
     
     local allFound = {}
     local totalFound = 0
+    
+    local locationName = locationKey:match("(.*)_")
     
     if locationName and _G.ChainItems[locationName] then
         local chainFound, chainItems = teleportChainItems(locationName)
@@ -763,7 +578,7 @@ end)
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 420), true
+MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local function createTab(name, text, posX)
@@ -785,13 +600,25 @@ EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, Esca
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() 
     shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap 
     vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) 
     vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" 
 end)
+
+-- ========== AUTO ESCAPE BUTTON ==========
+local AutoEscapeMainBtn = Instance.new("TextButton", MainFrame)
+AutoEscapeMainBtn.Name = "AutoEscapeMainBtn"
+AutoEscapeMainBtn.Size = UDim2.new(0.9, 0, 0, 35)
+AutoEscapeMainBtn.Position = UDim2.new(0.05, 0, 0.34, 0)
+AutoEscapeMainBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
+AutoEscapeMainBtn.Font = Enum.Font.SourceSansBold
+AutoEscapeMainBtn.Text = "Auto Escape"
+AutoEscapeMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoEscapeMainBtn.TextSize = 14
+Instance.new("UICorner", AutoEscapeMainBtn).CornerRadius = UDim.new(0, 5)
 
 local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
@@ -825,28 +652,16 @@ NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 NoclipBtn.TextSize = 13
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
--- ========== AUTO ESCAPE BUTTON ==========
-local AutoEscapeMainBtn = Instance.new("TextButton", MainFrame)
-AutoEscapeMainBtn.Name = "AutoEscapeMainBtn"
-AutoEscapeMainBtn.Size = UDim2.new(0.9, 0, 0, 35)
-AutoEscapeMainBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
-AutoEscapeMainBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
-AutoEscapeMainBtn.Font = Enum.Font.SourceSansBold
-AutoEscapeMainBtn.Text = "Auto Escape"
-AutoEscapeMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoEscapeMainBtn.TextSize = 15
-Instance.new("UICorner", AutoEscapeMainBtn).CornerRadius = UDim.new(0, 5)
-
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
 LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
 local RB = Instance.new("TextButton", MainFrame)
-RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.88, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
+RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
 -- ================================================
--- AUTO ESCAPE SUB-MENU
+-- AUTO ESCAPE SUB-MENU (STYLE LIKE REST OF MENU)
 -- ================================================
 local AutoEscapeSubMenu = {}
 
@@ -857,16 +672,16 @@ function AutoEscapeSubMenu:Show()
     Backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Backdrop.BackgroundTransparency = 0.5
     Backdrop.ZIndex = 10
-    
+
     local SubFrame = Instance.new("Frame", Backdrop)
     SubFrame.Name = "AutoEscapeFrame"
     SubFrame.Size = UDim2.new(0, 280, 0, 340)
     SubFrame.Position = UDim2.new(0.5, -140, 0.5, -170)
-    SubFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    SubFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
     SubFrame.BorderSizePixel = 0
     SubFrame.ZIndex = 11
     Instance.new("UICorner", SubFrame).CornerRadius = UDim.new(0, 10)
-    
+
     local Title = Instance.new("TextLabel", SubFrame)
     Title.Size = UDim2.new(1, 0, 0, 40)
     Title.Position = UDim2.new(0, 0, 0, 5)
@@ -876,7 +691,7 @@ function AutoEscapeSubMenu:Show()
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 22
     Title.ZIndex = 12
-    
+
     local CloseBtn = Instance.new("TextButton", SubFrame)
     CloseBtn.Size = UDim2.new(0, 30, 0, 30)
     CloseBtn.Position = UDim2.new(1, -35, 0, 5)
@@ -890,82 +705,137 @@ function AutoEscapeSubMenu:Show()
     CloseBtn.MouseButton1Click:Connect(function()
         Backdrop:Destroy()
     end)
-    
+
     local Scroll = Instance.new("ScrollingFrame", SubFrame)
     Scroll.Size = UDim2.new(0.95, 0, 0, 250)
     Scroll.Position = UDim2.new(0.025, 0, 0.15, 0)
     Scroll.BackgroundTransparency = 1
     Scroll.ScrollBarThickness = 4
     Scroll.ZIndex = 12
-    
+
     local Layout = Instance.new("UIListLayout", Scroll)
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
     Layout.Padding = UDim.new(0, 5)
-    
-    local function createRouteButton(parent, text, color, itemList)
+
+    local function createLocationButton(parent, text, routes)
         local btn = Instance.new("TextButton", parent)
-        btn.Size = UDim2.new(1, 0, 0, 35)
-        btn.BackgroundColor3 = color or Color3.fromRGB(45, 45, 50)
+        btn.Size = UDim2.new(1, 0, 0, 40)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
         btn.Text = text
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.Font = Enum.Font.SourceSansBold
-        btn.TextSize = 14
+        btn.TextSize = 15
         btn.ZIndex = 13
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-        
+
         btn.MouseButton1Click:Connect(function()
-            local locationKey = text:gsub(".*%s", "")
-            local locationName = text:gsub("%s-.*", "")
-            local count = teleportEscapeItems(itemList, locationName)
-            local msg = count > 0 and string.format("Items teleported: %d", count) or "No items found!"
-            print(string.format("[Auto Escape] %s: %s", text, msg))
-            
-            local notif = Instance.new("TextLabel", SubFrame)
-            notif.Size = UDim2.new(0.9, 0, 0, 30)
-            notif.Position = UDim2.new(0.05, 0, 0.92, 0)
-            notif.BackgroundColor3 = count > 0 and Color3.fromRGB(40, 200, 40) or Color3.fromRGB(200, 40, 40)
-            notif.Text = count > 0 and "Items teleported!" or "No items found!"
-            notif.TextColor3 = Color3.fromRGB(255, 255, 255)
-            notif.Font = Enum.Font.SourceSansBold
-            notif.TextSize = 14
-            notif.ZIndex = 13
-            Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 5)
-            task.wait(2)
-            notif:Destroy()
-            
-            if count > 0 then
-                task.wait(0.5)
-                Backdrop:Destroy()
+            local RouteBackdrop = Instance.new("Frame", Backdrop)
+            RouteBackdrop.Name = "RouteBackdrop"
+            RouteBackdrop.Size = UDim2.new(1, 0, 1, 0)
+            RouteBackdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            RouteBackdrop.BackgroundTransparency = 0.3
+            RouteBackdrop.ZIndex = 20
+
+            local RouteFrame = Instance.new("Frame", RouteBackdrop)
+            RouteFrame.Size = UDim2.new(0, 240, 0, 150)
+            RouteFrame.Position = UDim2.new(0.5, -120, 0.5, -75)
+            RouteFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+            RouteFrame.BorderSizePixel = 0
+            RouteFrame.ZIndex = 21
+            Instance.new("UICorner", RouteFrame).CornerRadius = UDim.new(0, 10)
+
+            local RouteTitle = Instance.new("TextLabel", RouteFrame)
+            RouteTitle.Size = UDim2.new(1, 0, 0, 35)
+            RouteTitle.Position = UDim2.new(0, 0, 0, 5)
+            RouteTitle.BackgroundTransparency = 1
+            RouteTitle.Text = text
+            RouteTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+            RouteTitle.Font = Enum.Font.GothamBold
+            RouteTitle.TextSize = 18
+            RouteTitle.ZIndex = 22
+
+            local RouteClose = Instance.new("TextButton", RouteFrame)
+            RouteClose.Size = UDim2.new(0, 30, 0, 30)
+            RouteClose.Position = UDim2.new(1, -35, 0, 5)
+            RouteClose.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+            RouteClose.Text = "X"
+            RouteClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+            RouteClose.Font = Enum.Font.SourceSansBold
+            RouteClose.TextSize = 16
+            RouteClose.ZIndex = 22
+            Instance.new("UICorner", RouteClose).CornerRadius = UDim.new(0, 5)
+            RouteClose.MouseButton1Click:Connect(function()
+                RouteBackdrop:Destroy()
+            end)
+
+            local RouteScroll = Instance.new("ScrollingFrame", RouteFrame)
+            RouteScroll.Size = UDim2.new(0.95, 0, 0, 70)
+            RouteScroll.Position = UDim2.new(0.025, 0, 0.15, 0)
+            RouteScroll.BackgroundTransparency = 1
+            RouteScroll.ScrollBarThickness = 4
+            RouteScroll.ZIndex = 22
+
+            local RouteLayout = Instance.new("UIListLayout", RouteScroll)
+            RouteLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            RouteLayout.Padding = UDim.new(0, 5)
+
+            for _, route in pairs(routes) do
+                local rbtn = Instance.new("TextButton", RouteScroll)
+                rbtn.Size = UDim2.new(1, 0, 0, 30)
+                rbtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+                rbtn.Text = route.text
+                rbtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                rbtn.Font = Enum.Font.SourceSansBold
+                rbtn.TextSize = 13
+                rbtn.ZIndex = 23
+                Instance.new("UICorner", rbtn).CornerRadius = UDim.new(0, 5)
+
+                rbtn.MouseButton1Click:Connect(function()
+                    local count = teleportEscapeItems(route.key)
+                    local msg = count > 0 and string.format("Items teleported: %d", count) or "No items found!"
+                    print(string.format("[Auto Escape] %s: %s", route.text, msg))
+
+                    local notif = Instance.new("TextLabel", RouteFrame)
+                    notif.Size = UDim2.new(0.9, 0, 0, 30)
+                    notif.Position = UDim2.new(0.05, 0, 0.85, 0)
+                    notif.BackgroundColor3 = count > 0 and Color3.fromRGB(40, 200, 40) or Color3.fromRGB(200, 40, 40)
+                    notif.Text = count > 0 and "Items teleported!" or "No items found!"
+                    notif.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    notif.Font = Enum.Font.SourceSansBold
+                    notif.TextSize = 14
+                    notif.ZIndex = 23
+                    Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 5)
+                    task.wait(2)
+                    notif:Destroy()
+
+                    if count > 0 then
+                        task.wait(0.5)
+                        RouteBackdrop:Destroy()
+                        Backdrop:Destroy()
+                    end
+                end)
             end
         end)
         return btn
     end
-    
+
     local locations = {
-        {"House 1 - Door", "House1_Door", Color3.fromRGB(60, 80, 180)},
-        {"House 1 - Car", "House1_Car", Color3.fromRGB(60, 180, 80)},
-        {"House 2 - Door", "House2_Door", Color3.fromRGB(180, 120, 60)},
-        {"House 2 - Boat", "House2_Boat", Color3.fromRGB(60, 180, 180)},
-        {"Mansion - Gate", "Mansion_Gate", Color3.fromRGB(180, 60, 180)},
-        {"Mansion - Train", "Mansion_Train", Color3.fromRGB(180, 180, 60)},
-        {"School - Door", "School_Door", Color3.fromRGB(60, 120, 200)},
-        {"School - Bus", "School_Bus", Color3.fromRGB(60, 200, 120)},
-        {"Ski Resort - Gate", "Ski_Gate", Color3.fromRGB(100, 200, 255)},
-        {"Ski Resort - TeleSiege", "Ski_TeleSiege", Color3.fromRGB(255, 200, 100)},
-        {"Cemetery - Gate", "Cemetery_Gate", Color3.fromRGB(150, 100, 150)},
+        {name = "House 1", routes = {{text = "Door", key = "House1_Door"}, {text = "Car", key = "House1_Car"}}},
+        {name = "House 2", routes = {{text = "Door", key = "House2_Door"}, {text = "Boat", key = "House2_Boat"}}},
+        {name = "Mansion", routes = {{text = "Gate", key = "Mansion_Gate"}, {text = "Train", key = "Mansion_Train"}}},
+        {name = "School", routes = {{text = "Door", key = "School_Door"}, {text = "Bus", key = "School_Bus"}}},
+        {name = "Ski Resort", routes = {{text = "Gate", key = "Ski_Gate"}, {text = "TeleSiege", key = "Ski_TeleSiege"}}},
+        {name = "Cemetery", routes = {{text = "Gate", key = "Cemetery_Gate"}}}
     }
-    
+
     for _, loc in pairs(locations) do
-        local items = _G.EscapeItems[loc[2]]
-        if items then
-            createRouteButton(Scroll, loc[1], loc[3], items)
-        end
+        createLocationButton(Scroll, loc.name, loc.routes)
     end
-    
+
     local CloseBottom = Instance.new("TextButton", SubFrame)
     CloseBottom.Size = UDim2.new(0.8, 0, 0, 30)
     CloseBottom.Position = UDim2.new(0.1, 0, 0.92, 0)
-    CloseBottom.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    CloseBottom.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
     CloseBottom.Text = "Close"
     CloseBottom.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBottom.Font = Enum.Font.SourceSansBold
