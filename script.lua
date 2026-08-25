@@ -264,7 +264,7 @@ Players.PlayerAdded:Connect(function(p)
 end)
 
 -- ================================================
--- GRANNY NPC ESP (shows "Bot")
+-- GRANNY NPC ESP
 -- ================================================
 local function applyGrannyESP(obj)
     if not obj or not shared.CheatConfig.GrannyESP then
@@ -599,8 +599,11 @@ local EscapesSubBtn = Instance.new("TextButton", SubNavFrame)
 EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, EscapesSubBtn.Font, EscapesSubBtn.Text, EscapesSubBtn.TextColor3, EscapesSubBtn.TextSize = UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(35, 35, 40), Enum.Font.SourceSansBold, "MOVEMENT", Color3.fromRGB(200, 200, 200), 12
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
+-- ========== КНОПКИ НА ГЛАВНОМ ЭКРАНЕ ==========
+
+-- 1) Anti-Kill + Trap
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
 vAK.MouseButton1Click:Connect(function() 
     shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap 
@@ -608,27 +611,29 @@ vAK.MouseButton1Click:Connect(function()
     vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" 
 end)
 
--- ========== AUTO ESCAPE BUTTON ==========
+-- 2) Auto Escape (под Anti-Kill)
 local AutoEscapeMainBtn = Instance.new("TextButton", MainFrame)
 AutoEscapeMainBtn.Name = "AutoEscapeMainBtn"
-AutoEscapeMainBtn.Size = UDim2.new(0.9, 0, 0, 35)
-AutoEscapeMainBtn.Position = UDim2.new(0.05, 0, 0.34, 0)
-AutoEscapeMainBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
+AutoEscapeMainBtn.Size = UDim2.new(0.9, 0, 0, 30)
+AutoEscapeMainBtn.Position = UDim2.new(0.05, 0, 0.32, 0)
+AutoEscapeMainBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
 AutoEscapeMainBtn.Font = Enum.Font.SourceSansBold
 AutoEscapeMainBtn.Text = "Auto Escape"
 AutoEscapeMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoEscapeMainBtn.TextSize = 14
+AutoEscapeMainBtn.TextSize = 13
 Instance.new("UICorner", AutoEscapeMainBtn).CornerRadius = UDim.new(0, 5)
 
+-- 3) SearchBox (Item Finder)
 local SearchBox = Instance.new("TextBox", MainFrame)
-SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
+SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 22), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 11, Enum.Font.SourceSans, "Type item name here...", ""
 Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 5)
 
+-- 4) Fly + Noclip
 local MoveControlsFrame = Instance.new("Frame", MainFrame)
 MoveControlsFrame.Name = "MoveControlsFrame"
 MoveControlsFrame.BackgroundTransparency = 1
 MoveControlsFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
-MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 40)
+MoveControlsFrame.Size = UDim2.new(0.9, 0, 0, 35)
 
 local FlyBtn = Instance.new("TextButton", MoveControlsFrame)
 FlyBtn.Name = "FlyBtn"
@@ -638,7 +643,7 @@ FlyBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 FlyBtn.Font = Enum.Font.SourceSansBold
 FlyBtn.Text = "Fly: OFF"
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.TextSize = 13
+FlyBtn.TextSize = 12
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 5)
 
 local NoclipBtn = Instance.new("TextButton", MoveControlsFrame)
@@ -649,19 +654,22 @@ NoclipBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
 NoclipBtn.Font = Enum.Font.SourceSansBold
 NoclipBtn.Text = "Noclip: OFF"
 NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoclipBtn.TextSize = 13
+NoclipBtn.TextSize = 12
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
+-- ScrollingFrame для списков
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
 LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
+
+-- Refresh List
 local RB = Instance.new("TextButton", MainFrame)
-RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
+RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 30), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 13
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
 
 -- ================================================
--- AUTO ESCAPE SUB-MENU (STYLE LIKE REST OF MENU)
+-- AUTO ESCAPE SUB-MENU
 -- ================================================
 local AutoEscapeSubMenu = {}
 
@@ -859,6 +867,9 @@ local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn
     EscBtn.MouseButton1Click:Connect(function() _G.cS = "Movement" EscBtn.TextColor3, EscBtn.BackgroundColor3, ItemsBtn.TextColor3, ItemsBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60), Color3.fromRGB(45, 45, 50), Color3.fromRGB(200, 200, 200), Color3.fromRGB(35, 35, 40) _G.updateMenuDisplay() end)
 end
 
+-- ================================================
+-- UPDATE MENU DISPLAY
+-- ================================================
 _G.updateMenuDisplay = function()
     for _, child in pairs(SF:GetChildren()) do if child:IsA("TextButton") or child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end end
     local ad, te = {}, 0
@@ -935,6 +946,25 @@ end
 MainFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = i.Position startPos = MainFrame.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
 MainFrame.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then dragInput = i end end)
 UserInputService.InputChanged:Connect(function(i) if i == dragInput and dragging then local delta = i.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function() _G.SearchQuery = SearchBox.Text _G.updateMenuDisplay() end)
+setupTabClicks(PlayerTabBtn, GrannyTabBtn, VisualsTabBtn, ItemsSubBtn, EscapesSubBtn)
+
+FlyBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Fly = not shared.CheatConfig.Fly
+    FlyBtn.BackgroundColor3 = shared.CheatConfig.Fly and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    FlyBtn.Text = shared.CheatConfig.Fly and "Fly: ON" or "Fly: OFF"
+    toggleFly()
+end)
+
+NoclipBtn.MouseButton1Click:Connect(function()
+    shared.CheatConfig.Noclip = not shared.CheatConfig.Noclip
+    NoclipBtn.BackgroundColor3 = shared.CheatConfig.Noclip and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60)
+    NoclipBtn.Text = shared.CheatConfig.Noclip and "Noclip: ON" or "Noclip: OFF"
+end)
+
+RB.MouseButton1Click:Connect(_G.updateMenuDisplay)
+_G.updateMenuDisplay()
 
 -- ================================================
 -- part 6 - FLY (PERFECT CENTER + FREEZE)
@@ -1051,9 +1081,6 @@ RunService.Stepped:Connect(function()
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
     end
 end)
-
-SearchBox:GetPropertyChangedSignal("Text"):Connect(function() _G.SearchQuery = SearchBox.Text _G.updateMenuDisplay() end)
-setupTabClicks(PlayerTabBtn, GrannyTabBtn, VisualsTabBtn, ItemsSubBtn, EscapesSubBtn)
 
 FlyBtn.MouseButton1Click:Connect(function()
     shared.CheatConfig.Fly = not shared.CheatConfig.Fly
