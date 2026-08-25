@@ -15,17 +15,285 @@ shared.CheatConfig = shared.CheatConfig or {
     Fly = false, 
     Noclip = false, 
     ItemsESP = false,
-    GrannyESP = false   -- NEW!
+    GrannyESP = false
 }
 
--- ========== CUSTOMIZE YOUR ITEMS HERE ==========
+-- ========== ITEMS FOR AUTO ESCAPE ==========
+_G.EscapeItems = {
+    ["House1_Door"] = {"Master Key", "Padlock Key", "Hammer", "Cutting Pliers", "Screwdriver"},
+    ["House1_Car"] = {"Gasoline can", "Car Key", "Car battery"},
+    ["House2_Door"] = {"Door handle", "Crowbar", "Cutting pliers", "Padlock key", "Hand wheel"},
+    ["House2_Boat"] = {"Boat key", "Padlock key", "Gasoline Can", "Boat Steering Wheel", "Spark Plug"},
+    ["Mansion_Gate"] = {"Bridge Crank", "Fuse", "Generator Cable"},
+    ["Mansion_Train"] = {"Ticket", "Train Key", "Accelerator"},
+    ["School_Door"] = {"Master Key", "Padlock Key", "Hand wheel"},
+    ["School_Bus"] = {"Bus Key", "Bus Steering Wheel", "Gallon"},
+    ["Ski_Gate"] = {"Remote Control", "Code", "Padlock Key"},
+    ["Ski_TeleSiege"] = {"Screwdriver", "Gear"},
+    ["Cemetery_Gate"] = {"Gate Key"}
+}
+
+-- ========== CHAIN ITEMS FOR ALL LOCATIONS ==========
+_G.ChainItems = {
+    ["House1"] = {
+        {
+            Target = "Padlock Key",
+            Requires = {"Screwdriver"},
+            Location = "Behind the screwed metal sheet"
+        },
+        {
+            Target = "Screwdriver",
+            Requires = {"Safe Key"},
+            Location = "Basement - Inside the safe"
+        },
+        {
+            Target = "Safe Key",
+            Requires = {},
+            Location = "Kitchen - Inside the microwave"
+        },
+        {
+            Target = "Master Key",
+            Requires = {"Playhouse Key"},
+            Location = "Inside the playhouse"
+        },
+        {
+            Target = "Playhouse Key",
+            Requires = {},
+            Location = "Outside area - Inside the well"
+        }
+    },
+    ["House2"] = {
+        {
+            Target = "Door Handle",
+            Requires = {"Security Key"},
+            Location = "Security room top floor, Chained box"
+        },
+        {
+            Target = "Cutting Pliers",
+            Requires = {"Safe Key"},
+            Location = "Closet room next to the front door, inside the safe"
+        },
+        {
+            Target = "Safe Key",
+            Requires = {},
+            Location = "Security Room - Top of drawer next to the monitors"
+        },
+        {
+            Target = "Security Key",
+            Requires = {},
+            Location = "Kitchen - One of the cabinets"
+        },
+        {
+            Target = "Padlock Key",
+            Requires = {},
+            Location = "Outside, sealed box"
+        },
+        {
+            Target = "Hand Wheel",
+            Requires = {},
+            Location = "Sealed box in the balcony"
+        },
+        {
+            Target = "Gasoline Can",
+            Requires = {},
+            Location = "Sealed box in the basement"
+        },
+        {
+            Target = "Crowbar",
+            Requires = {},
+            Location = "Outside - Pet's cage"
+        }
+    },
+    ["Mansion"] = {
+        {
+            Target = "Fuse",
+            Requires = {"Coconut"},
+            Location = "Inside the coconut - cut using guillotine"
+        },
+        {
+            Target = "Coconut",
+            Requires = {"Safe Key"},
+            Location = "Toilet - Inside the safe"
+        },
+        {
+            Target = "Safe Key",
+            Requires = {},
+            Location = "Rooftop - Inside the bird nest"
+        },
+        {
+            Target = "Generator Cable",
+            Requires = {"Safe Key"},
+            Location = "(B1) - Inside the Pedestal Safe"
+        },
+        {
+            Target = "Bridge Crank",
+            Requires = {},
+            Location = "(F2) Bedroom - On the bed"
+        },
+        {
+            Target = "Ticket",
+            Requires = {},
+            Location = "Basement - Inside the ticket vendor"
+        },
+        {
+            Target = "Train Key",
+            Requires = {},
+            Location = "(F2) - Inside the sealed wooden crate"
+        },
+        {
+            Target = "Accelerator",
+            Requires = {},
+            Location = "(F2) Crib room - After summoning Slendrina"
+        }
+    },
+    ["School"] = {
+        {
+            Target = "Security Key",
+            Requires = {"Safe Key"},
+            Location = "Inside the safe in a wall, In front of women's bathroom"
+        },
+        {
+            Target = "Safe Key",
+            Requires = {},
+            Location = "Medical Room - Inside the drawer under a bed"
+        },
+        {
+            Target = "Hand Wheel",
+            Requires = {},
+            Location = "Ceiling on the right side of the door leading to the kitchen"
+        },
+        {
+            Target = "Padlock Key",
+            Requires = {},
+            Location = "Geography Class - Inside a closet or Drawer"
+        },
+        {
+            Target = "Master Key",
+            Requires = {},
+            Location = "Math Class - Inside a drawer"
+        },
+        {
+            Target = "Bus Key",
+            Requires = {},
+            Location = "Cafeteria - Inside a vent between two tables"
+        },
+        {
+            Target = "Bus Steering Wheel",
+            Requires = {},
+            Location = "Boiler Room - Inside the furnace"
+        },
+        {
+            Target = "Gallon",
+            Requires = {},
+            Location = "Outside area - Inside the security booth"
+        },
+        {
+            Target = "Cutting Pliers",
+            Requires = {},
+            Location = "Inside a locker with sticky-notes, between Storage room and men's bathroom"
+        },
+        {
+            Target = "Screwdriver",
+            Requires = {},
+            Location = "Inside a locker with sticky-notes, Near women's bathroom"
+        }
+    },
+    ["Ski"] = {
+        {
+            Target = "Remote Control",
+            Requires = {"Safe Key"},
+            Location = "3 - Inside the Safe"
+        },
+        {
+            Target = "Safe Key",
+            Requires = {},
+            Location = "4 - Inside a drawer, Bottom floor"
+        },
+        {
+            Target = "Gear",
+            Requires = {"Chest Key"},
+            Location = "11 - Inside a locked chest near the arcade machines"
+        },
+        {
+            Target = "Chest Key",
+            Requires = {},
+            Location = "5 - Inside the wooden crate"
+        },
+        {
+            Target = "Code",
+            Requires = {},
+            Location = "4 - Stuck to a pillar near the stairs"
+        },
+        {
+            Target = "Padlock Key",
+            Requires = {},
+            Location = "12 - Small prize cabinet inside the wall"
+        },
+        {
+            Target = "Screwdriver",
+            Requires = {},
+            Location = "Room 10's porch - Inside the wooden crate"
+        }
+    },
+    ["Cemetery"] = {
+        {
+            Target = "Gate Key",
+            Requires = {},
+            Location = "2 - Inside the lectern's cabinet"
+        },
+        {
+            Target = "Ruby",
+            Requires = {},
+            Location = "B(B) - Inside the safe"
+        },
+        {
+            Target = "Emerald",
+            Requires = {},
+            Location = "13 - Inside the boarded-up hole"
+        },
+        {
+            Target = "Diamond",
+            Requires = {},
+            Location = "11 - Inside the pipe. On the ground after solving the puzzle"
+        }
+    }
+}
+
+-- ========== COMPLETE ITEM WHITELIST ==========
 _G.ItemWhitelist = {
+    -- Основные предметы
     "Key", "Padlock", "Hammer", "Cog", "Shotgun", "Weapon", "Gasoline", "Fuel",
     "Battery", "Spark", "Crank", "Book", "Teddy", "Plank", "Fuse", "Melon", "Crowbar",
     "Wrench", "Screwdriver", "Meat", "Winch handle","Valve", "Remote", "Card", "Code", 
     "Ticket", "Coin", "Tool", "Gun", "Ammo", "Ruby", "Diamond", "Emerald", "Plank",
     "Lock", "Box", "Crate", "Barrel", "Vase", "Pot", "Pan", "Knife", "Sword", "Axe",
-    "Pickaxe", "Shovel", "Safe key", "Car battery"
+    "Pickaxe", "Shovel",
+    
+    -- House 1
+    "Safe key", "Car battery", "Master Key", "Cutting Pliers", "Lock Code", 
+    "Car Key", "Gasoline Can", "Playhouse Key",
+    
+    -- House 2
+    "Door handle", "Hand wheel", "Boat key", "Boat Steering Wheel", "Spark Plug",
+    "Security Key", "Crowbar",
+    
+    -- Mansion
+    "Bridge Crank", "Generator Cable", "Train Key", "Accelerator", "Coconut",
+    "Ticket",
+    
+    -- School
+    "Bus Key", "Bus Steering Wheel", "Gallon", "Lock pick",
+    
+    -- Ski Resort
+    "Remote Control", "Gear", "Chest Key",
+    
+    -- Cemetery
+    "Gate Key",
+    
+    -- Дополнительные
+    "Engine Part", "Stun Gun", "Stun Gun Ammo", "Shotgun Ammo", "Crossbow",
+    "Tranquilizer Dart", "Slingshot", "Stone", "Musket", "Firewood", "Matches",
+    "Oil Can", "Silver Key", "Ball", "Shed Key", "Weapon Key", "Bird Seed"
 }
 
 _G.StructureBlacklist = {
@@ -94,7 +362,7 @@ local function toggleThirdPerson(enable)
     end)
 end
 
--- ========== GRANNY DETECTION (for players) ==========
+-- ========== GRANNY DETECTION ==========
 local function isPlayerGranny(p)
     if not p.Character then return false end
     local nL = string.lower(p.Name)
@@ -210,7 +478,7 @@ local function applyGrannyESP(obj)
         local label = Instance.new("TextLabel", bgui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = "🧟 Granny"
+        label.Text = "Granny"
         label.TextColor3 = Color3.fromRGB(255, 0, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.SourceSansBold
@@ -277,7 +545,123 @@ local function removeItemESP(obj)
 end
 
 -- ================================================
--- SCAN LOOP - PLAYERS + ITEMS + GRANNY NPC
+-- AUTO ESCAPE FUNCTIONS
+-- ================================================
+local function teleportChainItems(locationKey)
+    local char = LocalPlayer.Character
+    if not char then return 0, {} end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return 0, {} end
+    
+    local chain = _G.ChainItems[locationKey]
+    if not chain then return 0, {} end
+    
+    local teleported = {}
+    local totalFound = 0
+    
+    for _, step in pairs(chain) do
+        if #step.Requires == 0 then
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("Model") or obj:IsA("BasePart") then
+                    if string.find(obj.Name, step.Target) then
+                        local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)) or obj
+                        if targetPart and not obj:IsDescendantOf(char) then
+                            targetPart.CFrame = hrp.CFrame + Vector3.new(0, 1.5, 0)
+                            totalFound = totalFound + 1
+                            table.insert(teleported, step.Target)
+                            task.wait(0.05)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    local maxIterations = 10
+    local iteration = 0
+    while #teleported < #chain and iteration < maxIterations do
+        iteration = iteration + 1
+        for _, step in pairs(chain) do
+            if #step.Requires > 0 then
+                local canGet = true
+                for _, req in pairs(step.Requires) do
+                    if not table.find(teleported, req) then
+                        canGet = false
+                        break
+                    end
+                end
+                if canGet and not table.find(teleported, step.Target) then
+                    for _, obj in pairs(Workspace:GetDescendants()) do
+                        if obj:IsA("Model") or obj:IsA("BasePart") then
+                            if string.find(obj.Name, step.Target) then
+                                local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)) or obj
+                                if targetPart and not obj:IsDescendantOf(char) then
+                                    targetPart.CFrame = hrp.CFrame + Vector3.new(0, 1.5, 0)
+                                    totalFound = totalFound + 1
+                                    table.insert(teleported, step.Target)
+                                    task.wait(0.05)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return totalFound, teleported
+end
+
+local function teleportEscapeItems(locationKey, locationName)
+    local char = LocalPlayer.Character
+    if not char then return 0 end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return 0 end
+    
+    local itemList = _G.EscapeItems[locationKey]
+    if not itemList then return 0 end
+    
+    local allFound = {}
+    local totalFound = 0
+    
+    if locationName and _G.ChainItems[locationName] then
+        local chainFound, chainItems = teleportChainItems(locationName)
+        totalFound = totalFound + chainFound
+        for _, item in pairs(chainItems) do
+            table.insert(allFound, item)
+        end
+    end
+    
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") or obj:IsA("BasePart") then
+            for _, itemName in pairs(itemList) do
+                if string.find(obj.Name, itemName) then
+                    local alreadyFound = false
+                    for _, found in pairs(allFound) do
+                        if found == itemName then
+                            alreadyFound = true
+                            break
+                        end
+                    end
+                    if not alreadyFound then
+                        local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)) or obj
+                        if targetPart and not obj:IsDescendantOf(char) then
+                            targetPart.CFrame = hrp.CFrame + Vector3.new(0, 1.5, 0)
+                            totalFound = totalFound + 1
+                            table.insert(allFound, itemName)
+                            task.wait(0.05)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return totalFound
+end
+
+-- ================================================
+-- SCAN LOOP
 -- ================================================
 task.spawn(function()
     while task.wait(2) do
@@ -296,7 +680,6 @@ task.spawn(function()
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-                    -- 1) Player ESP
                     local player = Players:GetPlayerFromCharacter(obj)
                     if player and player ~= LocalPlayer then
                         if shared.CheatConfig.PlayersESP then
@@ -311,7 +694,6 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- 2) GRANNY NPC (only if not a player)
                     local nameLower = string.lower(obj.Name)
                     local isGrannyNPC = string.find(nameLower, "granny") or string.find(nameLower, "enemy") or string.find(nameLower, "grandpa")
                     if isGrannyNPC and not Players:GetPlayerFromCharacter(obj) then
@@ -324,14 +706,12 @@ task.spawn(function()
                         continue
                     end
                     
-                    -- 3) Item ESP
                     if shared.CheatConfig.ItemsESP and _G.isObjectAnItem(obj) then
                         applyItemESP(obj)
                     else
                         removeItemESP(obj)
                     end
                     
-                    -- Clean up Granny ESP if not a Granny NPC
                     if not isGrannyNPC then
                         removeGrannyESP(obj)
                     end
@@ -341,7 +721,6 @@ task.spawn(function()
     end
 end)
 
--- part 3 (Anti-Kill trap etc.)
 task.spawn(function()
     while task.wait(0.1) do
         if shared.CheatConfig.AntiKillTrap and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -378,11 +757,13 @@ task.spawn(function()
     end
 end)
 
+-- ================================================
 -- GUI
+-- ================================================
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name, ScreenGui.ResetOnSpawn = "GrannyPremiumClean", false
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 350), true
+MainFrame.Name, MainFrame.BackgroundColor3, MainFrame.Position, MainFrame.Size, MainFrame.Active = "MainFrame", Color3.fromRGB(25, 25, 30), UDim2.new(0.05, 0, 0.3, 0), UDim2.new(0, 260, 0, 420), true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local function createTab(name, text, posX)
@@ -404,9 +785,13 @@ EscapesSubBtn.Position, EscapesSubBtn.Size, EscapesSubBtn.BackgroundColor3, Esca
 Instance.new("UICorner", EscapesSubBtn).CornerRadius = UDim.new(0, 5)
 
 local vAK = Instance.new("TextButton", MainFrame)
-vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 35), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+vAK.Name, vAK.Size, vAK.Position, vAK.BackgroundColor3, vAK.Text, vAK.TextColor3, vAK.Font, vAK.TextSize = "AntiKillBtn", UDim2.new(0.9, 0, 0, 30), UDim2.new(0.05, 0, 0.26, 0), shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60), shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF", Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
 Instance.new("UICorner", vAK).CornerRadius = UDim.new(0, 5)
-vAK.MouseButton1Click:Connect(function() shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" end)
+vAK.MouseButton1Click:Connect(function() 
+    shared.CheatConfig.AntiKillTrap = not shared.CheatConfig.AntiKillTrap 
+    vAK.BackgroundColor3 = shared.CheatConfig.AntiKillTrap and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(55, 55, 60) 
+    vAK.Text = shared.CheatConfig.AntiKillTrap and "Anti-Kill + Trap: ON" or "Anti-Kill + Trap: OFF" 
+end)
 
 local SearchBox = Instance.new("TextBox", MainFrame)
 SearchBox.Name, SearchBox.Size, SearchBox.Position, SearchBox.BackgroundColor3, SearchBox.TextColor3, SearchBox.TextSize, SearchBox.Font, SearchBox.PlaceholderText, SearchBox.Text = "SearchBox", UDim2.new(0.9, 0, 0, 25), UDim2.new(0.05, 0, 0.38, 0), Color3.fromRGB(35, 35, 40), Color3.fromRGB(255, 255, 255), 12, Enum.Font.SourceSans, "Type item name here...", ""
@@ -440,13 +825,161 @@ NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 NoclipBtn.TextSize = 13
 Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0, 5)
 
+-- ========== AUTO ESCAPE BUTTON ==========
+local AutoEscapeMainBtn = Instance.new("TextButton", MainFrame)
+AutoEscapeMainBtn.Name = "AutoEscapeMainBtn"
+AutoEscapeMainBtn.Size = UDim2.new(0.9, 0, 0, 35)
+AutoEscapeMainBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
+AutoEscapeMainBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
+AutoEscapeMainBtn.Font = Enum.Font.SourceSansBold
+AutoEscapeMainBtn.Text = "Auto Escape"
+AutoEscapeMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoEscapeMainBtn.TextSize = 15
+Instance.new("UICorner", AutoEscapeMainBtn).CornerRadius = UDim.new(0, 5)
+
 local SF = Instance.new("ScrollingFrame", MainFrame)
 SF.BackgroundTransparency, SF.ScrollBarThickness = 1, 6
 local LY = Instance.new("UIListLayout", SF)
 LY.SortOrder, LY.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
 local RB = Instance.new("TextButton", MainFrame)
-RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.86, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
+RB.BackgroundColor3, RB.Position, RB.Size, RB.Font, RB.Text, RB.TextColor3, RB.TextSize = Color3.fromRGB(255, 60, 60), UDim2.new(0.05, 0, 0.88, 0), UDim2.new(0.9, 0, 0, 35), Enum.Font.SourceSansBold, "REFRESH LIST", Color3.fromRGB(255, 255, 255), 14
 Instance.new("UICorner", RB).CornerRadius = UDim.new(0, 6)
+
+-- ================================================
+-- AUTO ESCAPE SUB-MENU
+-- ================================================
+local AutoEscapeSubMenu = {}
+
+function AutoEscapeSubMenu:Show()
+    local Backdrop = Instance.new("Frame", ScreenGui)
+    Backdrop.Name = "AutoEscapeBackdrop"
+    Backdrop.Size = UDim2.new(1, 0, 1, 0)
+    Backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Backdrop.BackgroundTransparency = 0.5
+    Backdrop.ZIndex = 10
+    
+    local SubFrame = Instance.new("Frame", Backdrop)
+    SubFrame.Name = "AutoEscapeFrame"
+    SubFrame.Size = UDim2.new(0, 280, 0, 340)
+    SubFrame.Position = UDim2.new(0.5, -140, 0.5, -170)
+    SubFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    SubFrame.BorderSizePixel = 0
+    SubFrame.ZIndex = 11
+    Instance.new("UICorner", SubFrame).CornerRadius = UDim.new(0, 10)
+    
+    local Title = Instance.new("TextLabel", SubFrame)
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Position = UDim2.new(0, 0, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = "Auto Escape"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 22
+    Title.ZIndex = 12
+    
+    local CloseBtn = Instance.new("TextButton", SubFrame)
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.Font = Enum.Font.SourceSansBold
+    CloseBtn.TextSize = 16
+    CloseBtn.ZIndex = 12
+    Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+    CloseBtn.MouseButton1Click:Connect(function()
+        Backdrop:Destroy()
+    end)
+    
+    local Scroll = Instance.new("ScrollingFrame", SubFrame)
+    Scroll.Size = UDim2.new(0.95, 0, 0, 250)
+    Scroll.Position = UDim2.new(0.025, 0, 0.15, 0)
+    Scroll.BackgroundTransparency = 1
+    Scroll.ScrollBarThickness = 4
+    Scroll.ZIndex = 12
+    
+    local Layout = Instance.new("UIListLayout", Scroll)
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Padding = UDim.new(0, 5)
+    
+    local function createRouteButton(parent, text, color, itemList)
+        local btn = Instance.new("TextButton", parent)
+        btn.Size = UDim2.new(1, 0, 0, 35)
+        btn.BackgroundColor3 = color or Color3.fromRGB(45, 45, 50)
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.SourceSansBold
+        btn.TextSize = 14
+        btn.ZIndex = 13
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+        
+        btn.MouseButton1Click:Connect(function()
+            local locationKey = text:gsub(".*%s", "")
+            local locationName = text:gsub("%s-.*", "")
+            local count = teleportEscapeItems(itemList, locationName)
+            local msg = count > 0 and string.format("Items teleported: %d", count) or "No items found!"
+            print(string.format("[Auto Escape] %s: %s", text, msg))
+            
+            local notif = Instance.new("TextLabel", SubFrame)
+            notif.Size = UDim2.new(0.9, 0, 0, 30)
+            notif.Position = UDim2.new(0.05, 0, 0.92, 0)
+            notif.BackgroundColor3 = count > 0 and Color3.fromRGB(40, 200, 40) or Color3.fromRGB(200, 40, 40)
+            notif.Text = count > 0 and "Items teleported!" or "No items found!"
+            notif.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notif.Font = Enum.Font.SourceSansBold
+            notif.TextSize = 14
+            notif.ZIndex = 13
+            Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 5)
+            task.wait(2)
+            notif:Destroy()
+            
+            if count > 0 then
+                task.wait(0.5)
+                Backdrop:Destroy()
+            end
+        end)
+        return btn
+    end
+    
+    local locations = {
+        {"House 1 - Door", "House1_Door", Color3.fromRGB(60, 80, 180)},
+        {"House 1 - Car", "House1_Car", Color3.fromRGB(60, 180, 80)},
+        {"House 2 - Door", "House2_Door", Color3.fromRGB(180, 120, 60)},
+        {"House 2 - Boat", "House2_Boat", Color3.fromRGB(60, 180, 180)},
+        {"Mansion - Gate", "Mansion_Gate", Color3.fromRGB(180, 60, 180)},
+        {"Mansion - Train", "Mansion_Train", Color3.fromRGB(180, 180, 60)},
+        {"School - Door", "School_Door", Color3.fromRGB(60, 120, 200)},
+        {"School - Bus", "School_Bus", Color3.fromRGB(60, 200, 120)},
+        {"Ski Resort - Gate", "Ski_Gate", Color3.fromRGB(100, 200, 255)},
+        {"Ski Resort - TeleSiege", "Ski_TeleSiege", Color3.fromRGB(255, 200, 100)},
+        {"Cemetery - Gate", "Cemetery_Gate", Color3.fromRGB(150, 100, 150)},
+    }
+    
+    for _, loc in pairs(locations) do
+        local items = _G.EscapeItems[loc[2]]
+        if items then
+            createRouteButton(Scroll, loc[1], loc[3], items)
+        end
+    end
+    
+    local CloseBottom = Instance.new("TextButton", SubFrame)
+    CloseBottom.Size = UDim2.new(0.8, 0, 0, 30)
+    CloseBottom.Position = UDim2.new(0.1, 0, 0.92, 0)
+    CloseBottom.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    CloseBottom.Text = "Close"
+    CloseBottom.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBottom.Font = Enum.Font.SourceSansBold
+    CloseBottom.TextSize = 14
+    CloseBottom.ZIndex = 13
+    Instance.new("UICorner", CloseBottom).CornerRadius = UDim.new(0, 5)
+    CloseBottom.MouseButton1Click:Connect(function()
+        Backdrop:Destroy()
+    end)
+end
+
+AutoEscapeMainBtn.MouseButton1Click:Connect(function()
+    AutoEscapeSubMenu:Show()
+end)
 
 local function setupTabClicks(PlayerBtn, GrannyBtn, VisualsBtn, ItemsBtn, EscBtn)
     PlayerBtn.MouseButton1Click:Connect(function() _G.cM = "Player" _G.updateMenuDisplay() end)
@@ -471,7 +1004,6 @@ _G.updateMenuDisplay = function()
         end
         makeVis(shared.CheatConfig.PlayersESP and "ESP Players: ON" or "ESP Players: OFF", shared.CheatConfig.PlayersESP, function() shared.CheatConfig.PlayersESP = not shared.CheatConfig.PlayersESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ItemsESP and "ESP Items: ON" or "ESP Items: OFF", shared.CheatConfig.ItemsESP, function() shared.CheatConfig.ItemsESP = not shared.CheatConfig.ItemsESP _G.updateMenuDisplay() end)
-        -- NEW: ESP Granny button
         makeVis(shared.CheatConfig.GrannyESP and "ESP Granny: ON" or "ESP Granny: OFF", shared.CheatConfig.GrannyESP, function() shared.CheatConfig.GrannyESP = not shared.CheatConfig.GrannyESP _G.updateMenuDisplay() end)
         makeVis(shared.CheatConfig.ThirdPerson and "3rd Person Camera: ON" or "3rd Person Camera: OFF", shared.CheatConfig.ThirdPerson, function() shared.CheatConfig.ThirdPerson = not shared.CheatConfig.ThirdPerson toggleThirdPerson(shared.CheatConfig.ThirdPerson) _G.updateMenuDisplay() end)
         SF.CanvasSize = UDim2.new(0, 0, 0, 160) return
@@ -486,7 +1018,8 @@ _G.updateMenuDisplay = function()
         SF.CanvasSize = UDim2.new(0, 0, 0, te * 38) return
     elseif _G.cM == "Player" then
         SubNavFrame.Visible = true
-        if _G.cS == "Movement" then SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = false, true, true, false
+        if _G.cS == "Movement" then 
+            SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = false, true, true, false
         else
             SearchBox.Visible, vAK.Visible, MoveControlsFrame.Visible, SF.Visible = true, true, false, true
             SF.Position, SF.Size = UDim2.new(0.05, 0, 0.49, 0), UDim2.new(0.9, 0, 0, 115)
